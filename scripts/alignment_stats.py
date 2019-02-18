@@ -18,10 +18,10 @@ def main():
     args = get_args()
     stats = [Bamstats(b) for b in args.bams]
     with open(args.output, 'w') as output:
-        output.write("Samples:\t{}\n".format('\t'.join([s.name for s in stats])))
-        output.write("Mapped:\t{}\n".format('\t'.join([str(s.mapped) for s in stats])))
-        output.write("Unmapped:\t{}\n".format('\t'.join([str(s.unmapped) for s in stats])))
-        output.write("Mapped_fraction:\t{}\n".format('\t'.join([str(s.mapped_p) for s in stats])))
+        output.write("Samples:\tTotal\t{}\n".format('\t'.join([s.name for s in stats])))
+        output.write("Mapped:\t{0}\t{1}\n".format(sum([s.mapped for s in stats]), '\t'.join([str(s.mapped) for s in stats])))
+        output.write("Unmapped:\t{0}\t{1}\n".format(sum([s.unmapped for s in stats]), '\t'.join([str(s.unmapped) for s in stats])))
+        output.write("Mapped_fraction:\t{0}\t{1}\n".format(round(sum([s.mapped for s in stats]) / sum([s.total for s in stats]), ndigits=2), '\t'.join([str(s.mapped_p) for s in stats])))
 
 
 def get_args():
