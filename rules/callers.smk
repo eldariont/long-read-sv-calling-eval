@@ -27,25 +27,25 @@ rule filter_svim:
     input:
         "{aligner}/svim_calls/{sample}/final_results.vcf"
     output:
-        "{aligner}/svim_calls/{sample,[A-Za-z0-9]+}.vcf"
+        "{aligner}/svim_calls/{sample,[A-Za-z0-9]+}.min_{minscore}.vcf"
     threads: 1
     log:
-        "logs/{aligner}/svim_call/{sample}.filter.log"
+        "logs/{aligner}/svim_call/{sample}.filter.{minscore}.log"
     shell:
         "cat {input} | \
          awk '{{ if($1 ~ /^#/) {{ print $0 }} \
-         else {{ if($6>40) {{ print $0 }} }} }}' > {output}"
+         else {{ if($6>={wildcards.minscore}) {{ print $0 }} }} }}' > {output}"
 
 rule sniffles_call:
     input:
         "{aligner}/alignment/{sample}.bam"
     output:
-        "{aligner}/sniffles_calls/{sample}.vcf"
-    threads: 8
+        "{aligner}/sniffles_calls/{sample}.min_{minsupport}.vcf"
+    threads: 1
     log:
-        "logs/{aligner}/sniffles_call/{sample}.log"
+        "logs/{aligner}/sniffles_call/{sample}.{minsupport}.log"
     shell:
-        "sniffles --mapped_reads {input} --vcf {output} --threads {threads} 2> {log}"
+        "sniffles --mapped_reads {input} --min_support {wildcards.minsupport} --vcf {output} --threads {threads} > {log}"
 
 rule samtools_split:
     input:

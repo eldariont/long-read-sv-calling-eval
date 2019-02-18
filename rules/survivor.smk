@@ -1,7 +1,8 @@
 rule survivor_combine_callers:
     input:
-        expand("{{aligner}}/{caller}_calls/pooled.vcf",
-               caller=["sniffles", "svim", "nanosv"])
+        "{aligner}/sniffles_calls/pooled.min10.vcf",
+        "{aligner}/svim_calls/pooled.min40.vcf",
+        "{aligner}/nanosv_calls/pooled.vcf"
     output:
         vcf = temp("{aligner}/pooled_combined/genotypes.vcf"),
         fofn = temp("{aligner}/pooled_combined/samples.fofn")

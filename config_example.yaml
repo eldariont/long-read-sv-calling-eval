@@ -6,11 +6,5 @@ samples:
 genome:
     /path/to/database/genome.fa.gz
 
-annotbed:
-    /path/to/database/annotation.bed.gz
-
-vcfanno_conf:
-    /path/to/configuration/vcfanno_conf.toml
-
 parameters:
     survivor_distance: 500
