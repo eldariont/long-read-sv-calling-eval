@@ -65,6 +65,15 @@ rule minimap2_last_like_align:
         "minimap2 --MD -ax map-ont --no-long-join -r50 -t {threads} {input.genome} {input.fq}/*.fastq.gz | \
          samtools sort -@ {threads} -o {output} - 2> {log}"
 
+rule pool_samples:
+    input:
+        expand("{{aligner}}/alignment/{sample}.bam", sample=config["samples"])
+    output:
+        "{aligner}/alignment/pooled.bam"
+    log:
+        "logs/{aligner}/pool_samples.log"
+    shell:
+        "samtools merge -r {output} {input}"
 
 rule samtools_index:
     input:
@@ -82,9 +91,9 @@ rule alignment_stats:
         bam = expand("{{aligner}}/alignment/{sample}.bam", sample=config["samples"]),
         bai = expand("{{aligner}}/alignment/{sample}.bam.bai", sample=config["samples"])
     output:
-        "{aligner}/alignment_stats/{sample}.txt"
+        "{aligner}/alignment_stats/alignment_stats.txt"
     log:
-        "logs/{aligner}/alignment_stats/{sample}.log"
+        "logs/{aligner}/alignment_stats/alignment_stats.log"
     shell:
         os.path.join(workflow.basedir, "scripts/alignment_stats.py") + \
             " -o {output} {input.bam} 2> {log}"

@@ -1,3 +1,16 @@
+def get_chromosomes(genome):
+    '''
+    Gets the chromosome identifiers from the fasta genome
+    '''
+    fai = genome + ".fai"
+    if not os.path.isfile(fai):
+        sys.exit("Fasta index {} not found".format(fai))
+    fa_chr = [i.split('\t')[0] for i in open(fai)]
+    return fa_chr
+
+
+CHROMOSOMES = get_chromosomes(config["genome"])
+
 rule svim_call:
     input:
         "{aligner}/alignment/{sample}.bam"
@@ -14,7 +27,7 @@ rule filter_svim:
     input:
         "{aligner}/svim_calls/{sample}/final_results.vcf"
     output:
-        "{aligner}/svim_genotypes/{sample,[A-Za-z0-9]+}.vcf"
+        "{aligner}/svim_calls/{sample,[A-Za-z0-9]+}.vcf"
     threads: 1
     log:
         "logs/{aligner}/svim_call/{sample}.filter.log"
@@ -34,21 +47,6 @@ rule sniffles_call:
     shell:
         "sniffles --mapped_reads {input} --vcf {output} --threads {threads} 2> {log}"
 
-rule sniffles_genotype:
-    input:
-        bam = "{aligner}/alignment/{sample}.bam",
-        ivcf = "{aligner}/sniffles_combined/calls.vcf"
-    output:
-        "{aligner}/sniffles_genotypes_temp/{sample}.vcf"
-    threads: 8
-    log:
-        "logs/{aligner}/sniffles_genotype/{sample}.log"
-    shell:
-        "sniffles --mapped_reads {input.bam} \
-                  --vcf {output} \
-                  --threads {threads} \
-                  --Ivcf {input.ivcf} 2> {log}"
-
 rule samtools_split:
     input:
         bam = "{aligner}/alignment/{sample}.bam",
@@ -62,7 +60,6 @@ rule samtools_split:
     shell:
         "samtools view {input.bam} {params.chrom} -o {output} 2> {log}"
 
-
 rule nanosv_call:
     '''
 
@@ -73,10 +70,9 @@ rule nanosv_call:
     '''
     input:
         bam = "{aligner}/alignment/{sample}-{chromosome}.bam",
-        bai = "{aligner}/alignment/{sample}-{chromosome}.bam.bai",
-        bed = config["annotbed"]
+        bai = "{aligner}/alignment/{sample}-{chromosome}.bam.bai"
     output:
-        temp("{aligner}/split_nanosv_genotypes/{sample}-{chromosome}.vcf")
+        temp("{aligner}/split_nanosv_calls/{sample}-{chromosome}.vcf")
     params:
         samtools = "samtools"
     threads:
@@ -92,36 +88,62 @@ rule nanosv_call:
             echo -e "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tSAMPLE" >> {output}
             echo "NanoSV: No reads in {input.bam}" >> exceptions.txt 2> {log}
         else
-            NanoSV --bed {input.bed} \
-                    --threads {threads} \
+            NanoSV --threads {threads} \
                     --sambamba {params.samtools} {input.bam} \
                     -o {output} 2> {log}
         fi
         """
 
-rule npinv:
+rule nanosv_reheader:
     input:
-        bam = "{aligner}/alignment/{sample}.bam",
-        bai = "{aligner}/alignment/{sample}.bam.bai",
+        "{aligner}/split_nanosv_calls/{sample}-{chromosome}.vcf",
     output:
-        "{aligner}/npinv/{sample}.vcf"
+        vcf = temp("{aligner}/split_nanosv_calls_renamed/{sample}-{chromosome}.vcf"),
+        sample = temp("{aligner}/split_nanosv_calls_renamed/sample_{sample}-{chromosome}.txt")
+    params:
+        sample = "{sample}"
     log:
-        "logs/{aligner}/npinv/{sample}.log"
+        "logs/{aligner}/bcftools_reheader/{sample}-{chromosome}.log"
     shell:
-        "npinv --input {input} --output {output}"
+        """
+        echo {params.sample} > {output.sample} &&
+        bcftools reheader -s {output.sample} {input} -o {output.vcf} 2> {log}
+        """
 
-rule pbsv:
+rule nanosv_cat:
     input:
-        bam = "minimap2_pbsv/alignment/{sample}.bam",
-        bai = "minimap2_pbsv/alignment/{sample}.bam.bai",
-        genome = config["genome"],
+        expand("{{aligner}}/split_nanosv_calls_renamed/{{sample}}-{chromosome}.vcf",
+               chromosome=CHROMOSOMES)
     output:
-        vcf = "minimap2_pbsv/pbsv/{sample}.vcf",
-        svsig = temp("minimap2_pbsv/pbsv/{sample}.svsig.gz"),
+        "{aligner}/nanosv_calls/{sample}.vcf"
     log:
-        "logs/minimap2_pbsv/pbsv/{sample}.log"
+        "logs/{aligner}/bcftools-concat/{sample}.log"
     shell:
-        """
-        pbsv discover {input.bam} {output.svsig} && \
-        pbsv call {input.genome} {output.svsig} {output.vcf}
-        """
+        "bcftools concat {input} | bcftools sort - -o {output} 2> {log}"
+
+# rule npinv:
+    # input:
+        # bam = "{aligner}/alignment/{sample}.bam",
+        # bai = "{aligner}/alignment/{sample}.bam.bai",
+    # output:
+        # "{aligner}/npinv/{sample}.vcf"
+    # log:
+        # "logs/{aligner}/npinv/{sample}.log"
+    # shell:
+        # "npinv --input {input} --output {output}"
+
+# rule pbsv:
+    # input:
+        # bam = "minimap2_pbsv/alignment/{sample}.bam",
+        # bai = "minimap2_pbsv/alignment/{sample}.bam.bai",
+        # genome = config["genome"],
+    # output:
+        # vcf = "minimap2_pbsv/pbsv/{sample}.vcf",
+        # svsig = temp("minimap2_pbsv/pbsv/{sample}.svsig.gz"),
+    # log:
+        # "logs/minimap2_pbsv/pbsv/{sample}.log"
+    # shell:
+        # """
+        # pbsv discover {input.bam} {output.svsig} && \
+        # pbsv call {input.genome} {output.svsig} {output.vcf}
+        #"""

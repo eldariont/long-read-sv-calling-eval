@@ -1,32 +1,10 @@
-rule survivor:
+rule survivor_combine_callers:
     input:
-        expand("{{aligner}}/{{caller}}_{{stage}}/{sample}.vcf", sample=config["samples"])
-    output:
-        vcf = temp("{aligner}/{caller}_combined/{stage}.vcf"),
-        fofn = temp("{aligner}/{caller}_{stage}/samples.fofn")
-    params:
-        distance = config["parameters"]["survivor_distance"],
-        caller_support = 1,
-        same_type = 1,
-        same_strand = -1,
-        estimate_distance = -1,
-        minimum_size = -1,
-    log:
-        "logs/{aligner}/{caller}/survivor_{stage}.log"
-    shell:
-        "ls {input} > {output.fofn} ; \
-        SURVIVOR merge {output.fofn} {params.distance} {params.caller_support} \
-        {params.same_type} {params.same_strand} {params.estimate_distance}  \
-        {params.minimum_size} {output.vcf} 2> {log}"
-
-rule survivor_all:
-    input:
-        expand("{{aligner}}/{caller}_genotypes/{sample}.vcf",
-               sample=config["samples"],
+        expand("{{aligner}}/{caller}_calls/pooled.vcf",
                caller=["sniffles", "svim", "nanosv"])
     output:
-        vcf = temp("{aligner}/all_combined/genotypes.vcf"),
-        fofn = temp("{aligner}/all_combined/samples.fofn")
+        vcf = temp("{aligner}/pooled_combined/genotypes.vcf"),
+        fofn = temp("{aligner}/pooled_combined/samples.fofn")
     params:
         distance = config["parameters"]["survivor_distance"],
         caller_support = 1,
@@ -42,16 +20,13 @@ rule survivor_all:
         {params.same_type} {params.same_strand} {params.estimate_distance}  \
         {params.minimum_size} {output.vcf} 2> {log}"
 
-
-rule bgzip_and_tabix:
+rule sort_vcf:
     input:
-        "{aligner}/{caller}_genotypes/{sample}.vcf"
+        "{aligner}/pooled_combined/genotypes.vcf"
     output:
-        "{aligner}/{caller}_genotypes/{sample}.vcf.gz"
+        "{aligner}/pooled_combined/genotypes.sorted.vcf"
     log:
-        "logs/{aligner}/bgzip-tabix/{caller}-{sample}.log"
+        "logs/{aligner}/bcftools_sort/sorting_combined.log"
+    threads: 8
     shell:
-        """
-        vcf-sort {input} | bgzip > {output} 2> {log} &&
-        tabix -p vcf {output} 2>> {log}
-        """
+        "bcftools sort {input} > {output} 2> {log}"
