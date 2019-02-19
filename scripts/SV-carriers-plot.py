@@ -1,10 +1,10 @@
 #! /usr/bin/env python
 
-import matplotlib.pyplot as plt
 from cyvcf2 import VCF
 from argparse import ArgumentParser
 import matplotlib
 matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 
 def main():

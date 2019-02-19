@@ -8,6 +8,7 @@ include: "rules/align.smk"
 include: "rules/survivor.smk"
 include: "rules/callers.smk"
 include: "rules/vcf.smk"
+include: "rules/eval.smk"
 
 configfile: "config.yaml"
 
@@ -15,15 +16,23 @@ configfile: "config.yaml"
 
 rule minimap2:
     input:
+        #Alignments
         "minimap2/alignment_stats/alignment_stats.txt",
-        expand("minimap2/alignment/pooled.bam.bai"),
         "minimap2/mosdepth/regions.combined.gz",
-        "minimap2/mosdepth_global_plot/global.html",        
-        expand("minimap2/SV-plots/SV-length_{caller}_pooled.png",
-               caller=["sniffles", "nanosv", "svim"]),
-        expand("minimap2/SV-plots/SV-{caller}_carriers.png",
-               caller=["sniffles", "nanosv"]),
-        "minimap2/pooled_combined/genotypes.sorted.vcf",
+        "minimap2/mosdepth_global_plot/global.html",
+        #SV lengths
+        expand("minimap2/SV-plots/SV-length_sniffles_{minsupport}_pooled.png",
+                minsupport=range(1, 42, 5)),
+        expand("minimap2/SV-plots/SV-length_svim_{minscore}_pooled.png",
+                minscore=range(1, 100, 5)),
+        #"minimap2/SV-plots/SV-length_nanosv_pooled.png",
+        #Carriers
+        expand("minimap2/SV-plots/SV-sniffles_{minsupport}_carriers.png",
+               minsupport=range(1, 42, 5)),
+        #Evaluation
+        "minimap2/eval/tools_pr.png"
+        #"minimap2/SV-plots/SV-nanosv_carriers.png",
+        #"minimap2/pooled_combined/genotypes.sorted.vcf",
         # expand("minimap2/npinv/{sample}.vcf",
         #       sample=config["samples"]),
 

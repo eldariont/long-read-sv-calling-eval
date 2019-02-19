@@ -21,7 +21,7 @@ rule survivor_combine_callers:
         {params.same_type} {params.same_strand} {params.estimate_distance}  \
         {params.minimum_size} {output.vcf} 2> {log}"
 
-rule sort_vcf:
+rule sort_combined_calls:
     input:
         "{aligner}/pooled_combined/genotypes.vcf"
     output:

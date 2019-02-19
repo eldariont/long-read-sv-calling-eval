@@ -27,7 +27,7 @@ rule filter_svim:
     input:
         "{aligner}/svim_calls/{sample}/final_results.vcf"
     output:
-        "{aligner}/svim_calls/{sample,[A-Za-z0-9]+}.min_{minscore}.vcf"
+        "{aligner}/svim_calls/{sample,[A-Za-z0-9]+}.min_{minscore,[0-9]+}.vcf"
     threads: 1
     log:
         "logs/{aligner}/svim_call/{sample}.filter.{minscore}.log"
@@ -40,7 +40,7 @@ rule sniffles_call:
     input:
         "{aligner}/alignment/{sample}.bam"
     output:
-        "{aligner}/sniffles_calls/{sample}.min_{minsupport}.vcf"
+        "{aligner}/sniffles_calls/{sample}.min_{minsupport,[0-9]+}.vcf"
     threads: 1
     log:
         "logs/{aligner}/sniffles_call/{sample}.{minsupport}.log"

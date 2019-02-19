@@ -1,17 +1,28 @@
+rule sort_calls:
+    input:
+        "{aligner}/{caller}_calls/pooled.min_{minscore}.vcf"
+    output:
+        "{aligner}/{caller}_calls/pooled.min_{minscore}.sorted.vcf"
+    threads: 1
+    log:
+        "logs/{aligner}/bcftools_sort/sorting_{caller}_{minscore}.log"
+    shell:
+        "bcftools sort {input} > {output} 2> {log}"
+
 rule bgzip:
     input:
-        "{file}.vcf"
+        "{aligner}/{caller}_calls/pooled.min_{minscore}.sorted.vcf"
     output:
-        "{file}.vcf.gz"
+        "{aligner}/{caller}_calls/pooled.min_{minscore}.sorted.vcf.gz"
     shell:
         "bgzip -c {input} > {output}"
 
 
 rule tabix:
     input:
-        "{file}.vcf.gz"
+        "{aligner}/{caller}_calls/pooled.min_{minscore}.sorted.vcf.gz"
     output:
-        "{file}.vcf.gz.tbi"
+        "{aligner}/{caller}_calls/pooled.min_{minscore}.sorted.vcf.gz.tbi"
     shell:
         "tabix {input}"
 
@@ -20,8 +31,8 @@ rule callset_eval:
     input:
         genome = config["genome"],
         truth = config["truth"],
-        calls = "{aligner}/{caller}_calls/pooled.min_{minscore}.vcf.gz",
-        index = "{aligner}/{caller}_calls/pooled.min_{minscore}.vcf.gz.tbi"
+        calls = "{aligner}/{caller}_calls/pooled.min_{minscore}.sorted.vcf.gz",
+        index = "{aligner}/{caller}_calls/pooled.min_{minscore}.sorted.vcf.gz.tbi"
     output:
         "{aligner}/{caller}_results/{minscore}/summary.txt"
     params:
@@ -42,7 +53,7 @@ rule reformat_truvari_results:
         "{aligner}/{caller}_results/{minscore}/pr_rec.txt"
     threads: 1
     shell:
-        "cat {input} | grep 'precision\|recall' | tr -d ',' |sed 's/^[ \t]*//' | tr -d '\"' | tr -d ' ' | tr ':' '\t' | awk 'OFS=\"\\t\" {{ print {{minscore}}, $1, $2 }}' > {output}"
+        "cat {input} | grep 'precision\|recall' | tr -d ',' |sed 's/^[ \t]*//' | tr -d '\"' | tr -d ' ' | tr ':' '\t' | awk 'OFS=\"\\t\" {{ print \"{wildcards.caller}\", {wildcards.minscore}, $1, $2 }}' > {output}"
 
 
 rule cat truvari_results:
@@ -50,7 +61,19 @@ rule cat truvari_results:
         expand("{{aligner}}/svim_results/{minscore}/pr_rec.txt", minscore=range(1, 100, 5)),
         expand("{{aligner}}/sniffles_results/{minscore}/pr_rec.txt", minscore=range(1, 42, 5))
     output:
-        "{{aligner}}/eval/all_results.txt"
+        "{aligner}/eval/all_results.txt"
     threads: 1
     shell:
         "cat {input} > {output}"
+
+
+rule plot_pr_tools:
+    input:
+        "{aligner}/eval/all_results.txt"
+    output:
+        "{aligner}/eval/tools_pr.png"
+    threads: 1
+    log:
+        "logs/{aligner}/rplot/pooled.tools.pr.log"
+    shell:
+        "Rscript --vanilla scripts/plot-pr-tools.R {input} {output} > {log}"
