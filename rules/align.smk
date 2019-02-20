@@ -65,16 +65,6 @@ rule minimap2_last_like_align:
         "minimap2 --MD -ax map-ont --no-long-join -r50 -t {threads} {input.genome} {input.fq}/*.fastq.gz | \
          samtools sort -@ {threads} -o {output} - 2> {log}"
 
-rule pool_samples:
-    input:
-        expand("{{aligner}}/alignment/{sample}.bam", sample=config["samples"])
-    output:
-        "{aligner}/alignment/pooled.bam"
-    log:
-        "logs/{aligner}/pool_samples.log"
-    shell:
-        "samtools merge -r {output} {input}"
-
 rule samtools_index:
     input:
         "{aligner}/alignment/{sample}.bam"
@@ -97,3 +87,26 @@ rule alignment_stats:
     shell:
         os.path.join(workflow.basedir, "scripts/alignment_stats.py") + \
             " -o {output} {input.bam} 2> {log}"
+
+rule pool_samples:
+    input:
+        expand("{{aligner}}/alignment/{sample}.bam", sample=config["samples"])
+    output:
+        "{aligner}/alignment_pooled/pooled.bam"
+    log:
+        "logs/{aligner}/pool_samples.log"
+    shell:
+        "samtools merge -r {output} {input}"
+
+rule subsample_alignments:
+    input:
+        "{aligner}/alignment_pooled/pooled.bam"
+    output:
+        "{aligner}/alignment_pooled/pooled.subsampled.{fraction}.bam"
+    threads: 4
+    params:
+        additional_threads = 3
+    log:
+        "logs/{aligner}/samtools_view/subsample.log"
+    shell:
+        "samtools view -s 10.{wildcards.fraction} -@ {params.additional_threads} -b {input} -o {output}"

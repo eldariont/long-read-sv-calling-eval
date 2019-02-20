@@ -30,7 +30,9 @@ rule minimap2:
         expand("minimap2/SV-plots/SV-sniffles_{minsupport}_carriers.png",
                minsupport=range(1, 42, 5)),
         #Evaluation
-        "minimap2/eval/tools_pr.png"
+        "minimap2/eval/pooled/tools_pr.png",
+        expand("minimap2/eval/pooled.subsampled.{fraction}/tools_pr.png", fraction=range(10, 91, 10)),
+        expand("minimap2/eval/pooled/{caller}_pr_multiple_coverages.png", caller=["sniffles", "svim"])
         #"minimap2/SV-plots/SV-nanosv_carriers.png",
         #"minimap2/pooled_combined/genotypes.sorted.vcf",
         # expand("minimap2/npinv/{sample}.vcf",

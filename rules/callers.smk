@@ -13,7 +13,7 @@ CHROMOSOMES = get_chromosomes(config["genome"])
 
 rule svim_call:
     input:
-        "{aligner}/alignment/{sample}.bam"
+        "{aligner}/alignment_pooled/{sample}.bam"
     output:
         "{aligner}/svim_calls/{sample}/final_results.vcf"
     threads: 1
@@ -27,7 +27,7 @@ rule filter_svim:
     input:
         "{aligner}/svim_calls/{sample}/final_results.vcf"
     output:
-        "{aligner}/svim_calls/{sample,[A-Za-z0-9]+}.min_{minscore,[0-9]+}.vcf"
+        "{aligner}/svim_calls/{sample}.min_{minscore,[0-9]+}.vcf"
     threads: 1
     log:
         "logs/{aligner}/svim_call/{sample}.filter.{minscore}.log"
@@ -36,9 +36,20 @@ rule filter_svim:
          awk '{{ if($1 ~ /^#/) {{ print $0 }} \
          else {{ if($6>={wildcards.minscore}) {{ print $0 }} }} }}' > {output}"
 
+rule reformat_svim_calls_for_truvari:
+    input:
+        "{aligner}/svim_calls/{sample}.min_{minscore,[0-9]+}.vcf"
+    output:
+        "{aligner}/svim_calls/{sample}.min_{minscore,[0-9]+}.truvari.vcf"
+    threads: 1
+    shell:
+        "cat {input} | sed 's/INS:NOVEL/INS/g' | sed 's/DUP:INT/INS/g' | sed 's/DUP:TANDEM/INS/g' | \
+         awk '{{ if($1 ~ /^#/) {{ print $0 }} \
+         else {{ if($5==\"<DEL>\" || $5==\"<INS>\") {{ print $0 }} }} }}' > {output}"
+
 rule sniffles_call:
     input:
-        "{aligner}/alignment/{sample}.bam"
+        "{aligner}/alignment_pooled/{sample}.bam"
     output:
         "{aligner}/sniffles_calls/{sample}.min_{minsupport,[0-9]+}.vcf"
     threads: 1
@@ -49,10 +60,10 @@ rule sniffles_call:
 
 rule samtools_split:
     input:
-        bam = "{aligner}/alignment/{sample}.bam",
-        bai = "{aligner}/alignment/{sample}.bam.bai",
+        bam = "{aligner}/alignment_pooled/{sample}.bam",
+        bai = "{aligner}/alignment_pooled/{sample}.bam.bai",
     output:
-        temp("{aligner}/alignment/{sample}-{chromosome}.bam")
+        temp("{aligner}/alignment_pooled/{sample}-{chromosome}.bam")
     params:
         chrom = "{chromosome}"
     log:
@@ -69,8 +80,8 @@ rule nanosv_call:
     without raising an error
     '''
     input:
-        bam = "{aligner}/alignment/{sample}-{chromosome}.bam",
-        bai = "{aligner}/alignment/{sample}-{chromosome}.bam.bai"
+        bam = "{aligner}/alignment_pooled/{sample}-{chromosome}.bam",
+        bai = "{aligner}/alignment_pooled/{sample}-{chromosome}.bam.bai"
     output:
         temp("{aligner}/split_nanosv_calls/{sample}-{chromosome}.vcf")
     params:
@@ -123,8 +134,8 @@ rule nanosv_cat:
 
 # rule npinv:
     # input:
-        # bam = "{aligner}/alignment/{sample}.bam",
-        # bai = "{aligner}/alignment/{sample}.bam.bai",
+        # bam = "{aligner}/alignment_pooled/{sample}.bam",
+        # bai = "{aligner}/alignment_pooled/{sample}.bam.bai",
     # output:
         # "{aligner}/npinv/{sample}.vcf"
     # log:
@@ -134,8 +145,8 @@ rule nanosv_cat:
 
 # rule pbsv:
     # input:
-        # bam = "minimap2_pbsv/alignment/{sample}.bam",
-        # bai = "minimap2_pbsv/alignment/{sample}.bam.bai",
+        # bam = "minimap2_pbsv/alignment_pooled/{sample}.bam",
+        # bai = "minimap2_pbsv/alignment_pooled/{sample}.bam.bai",
         # genome = config["genome"],
     # output:
         # vcf = "minimap2_pbsv/pbsv/{sample}.vcf",
