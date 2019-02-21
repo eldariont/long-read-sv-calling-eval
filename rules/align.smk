@@ -18,26 +18,35 @@ rule minimap2_align:
         "minimap2 --MD -ax {params.preset} -t {threads} {input.genome} {input.fq} | \
          samtools sort -@ {threads} -o {output} - 2> {log}"
 
-rule minimap2_pbsv_align:
+rule pbmm_index:
+    input:
+        genome = config["genome"]
+    output:
+        index = config["genome"] + ".mmi"
+    params:
+        preset = config["parameters"]["pbmm_preset"]
+    threads: 1
+    shell:
+        "pbmm2 index {input.genome} {output.index} --preset {params.preset}"
+
+rule pbmm_align:
     input:
         fq = get_samples,
-        genome = config["genome"]
+        index = config["genome"] + ".mmi"
     output:
         "minimap2_pbsv/alignment/{sample}.bam"
     threads:
         8
     params:
         sample = "{sample}",
-        preset = config["parameters"]["minimap_preset"]
+        preset = config["parameters"]["pbmm_preset"]
     log:
         "logs/minimap2_pbsv/{sample}.log"
     shell:
         """
-        minimap2 -ax {params.preset} --eqx -L -O 5,56 -E 4,1 -B 5 \
-         --secondary=no -z 400,50 -r 2k -Y \
-         -R "@RG\tID:rg1a\tSM:{params.sample}" \
-         -t {threads} {input.genome} {input.fq} | \
-         samtools sort -@ {threads} -o {output} - 2> {log}"""
+        pbmm2 align {input.index} {input.fq} {output} --preset {params.preset} \
+                --sort --rg '@RG\tID:rg1a\tSM:{params.sample}' --sample HG2 2> {log}
+        """
 
 rule ngmlr_align:
     input:

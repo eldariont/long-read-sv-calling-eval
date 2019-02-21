@@ -65,6 +65,24 @@ rule callset_eval_sniffles:
                     -b {input.truth_vcf} -c {input.calls} -o {params.out_dir}\
                     --passonly --includebed {input.truth_bed} --giabreport -r 1000 -p 0.00 2> {log}"
 
+rule callset_eval_pbsv:
+    input:
+        genome = config["genome"],
+        truth_vcf = config["truth"]["vcf"],
+        truth_bed = config["truth"]["bed"],
+        calls = "{aligner}/pbsv_calls/{sample}.min_{minscore}.sorted.vcf.gz",
+        index = "{aligner}/pbsv_calls/{sample}.min_{minscore}.sorted.vcf.gz.tbi"
+    output:
+        "{aligner}/sniffles_results/{sample}/{minscore}/summary.txt"
+    params:
+        out_dir="{aligner}/sniffles_results/{sample}/{minscore}"
+    threads: 1
+    log:
+        "logs/{aligner}/truvari/pooled.sniffles.{sample}.{minscore}.log"
+    shell:
+        "rm -r {params.out_dir} && /project/pacbiosv/bin/truvari/truvari.py -f {input.genome}\
+                    -b {input.truth_vcf} -c {input.calls} -o {params.out_dir}\
+                    --passonly --includebed {input.truth_bed} --giabreport -r 1000 -p 0.00 2> {log}"
 
 rule reformat_truvari_results:
     input:
@@ -79,7 +97,8 @@ rule reformat_truvari_results:
 rule cat_truvari_results:
     input:
         expand("{{aligner}}/svim_results/{{sample}}/{minscore}/pr_rec.txt", minscore=range(1, 100, 5)),
-        expand("{{aligner}}/sniffles_results/{{sample}}/{minscore}/pr_rec.txt", minscore=range(1, 42, 5))
+        expand("{{aligner}}/sniffles_results/{{sample}}/{minscore}/pr_rec.txt", minscore=range(1, 42, 5)),
+        expand("{{aligner}}/pbsv_results/{{sample}}/{minscore}/pr_rec.txt", minscore=range(10, 91, 10))
     output:
         "{aligner}/eval/{sample}/all_results.txt"
     threads: 1
@@ -100,6 +119,15 @@ rule cat_truvari_results_sniffles_multiple_coverages:
         expand("{{aligner}}/sniffles_results/{{sample}}.subsampled.{fraction}/{minscore}/pr_rec.txt", fraction=range(10, 91, 10), minscore=range(1, 42, 5))
     output:
         "{aligner}/eval/{sample}/sniffles_results_multiple_coverages.txt"
+    threads: 1
+    shell:
+        "cat {input} > {output}"
+
+rule cat_truvari_results_pbsv_multiple_coverages:
+    input:
+        expand("{{aligner}}/pbsv_results/{{sample}}.subsampled.{fraction}/{minscore}/pr_rec.txt", fraction=range(10, 91, 10), minscore=range(10, 91, 10))
+    output:
+        "{aligner}/eval/{sample}/pbsv_results_multiple_coverages.txt"
     threads: 1
     shell:
         "cat {input} > {output}"

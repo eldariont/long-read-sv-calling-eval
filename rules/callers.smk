@@ -17,13 +17,14 @@ rule svim_call:
     output:
         "{aligner}/svim_calls/{sample}/final_results.vcf"
     params:
-        max_distance = config["parameters"]["svim_cluster_max_distance"]
+        max_distance = config["parameters"]["svim_cluster_max_distance"],
+        min_sv_size = config["parameters"]["min_sv_size"]
     threads: 1
     log:
         "logs/{aligner}/svim_call/{sample}.log"
     shell:
         "svim alignment --sample {wildcards.sample} --cluster_max_distance {params.max_distance} \
-         {wildcards.aligner}/svim_calls/{wildcards.sample}/ {input} 2> {log}"
+         --min_sv_size {params.min_sv_size} {wildcards.aligner}/svim_calls/{wildcards.sample}/ {input} 2> {log}"
 
 rule filter_svim:
     input:
@@ -54,11 +55,32 @@ rule sniffles_call:
         "{aligner}/alignment_pooled/{sample}.bam"
     output:
         "{aligner}/sniffles_calls/{sample}.min_{minsupport,[0-9]+}.vcf"
+    params:
+        min_sv_size = config["parameters"]["min_sv_size"]
     threads: 1
     log:
         "logs/{aligner}/sniffles_call/{sample}.{minsupport}.log"
     shell:
-        "sniffles --mapped_reads {input} --min_support {wildcards.minsupport} --vcf {output} --threads {threads} > {log}"
+        "sniffles --mapped_reads {input} --min_length {params.min_sv_size} --min_support {wildcards.minsupport} --vcf {output} --threads {threads} > {log}"
+
+rule pbsv:
+    input:
+        bam = "{aligner}/alignment_pooled/{sample}.bam",
+        bai = "{aligner}/alignment_pooled/{sample}.bam.bai",
+        genome = config["genome"],
+    output:
+        vcf = "{aligner}/pbsv_calls/{sample}.min_{minpercent,[0-9]+}.vcf",
+        svsig = temp("{aligner}/pbsv/{sample}.min_{minpercent}.svsig.gz")
+    params:
+        min_sv_size = config["parameters"]["min_sv_size"]
+    log:
+        "logs/{aligner}/pbsv/{sample}.{minpercent}.log"
+    shell:
+        """
+        pbsv discover {input.bam} {output.svsig} && \
+        pbsv call --min-sv-length {params.min_sv_size} \
+        --call-min-read-perc-one-sample {wildcards.minpercent} {input.genome} {output.svsig} {output.vcf}
+        """
 
 rule samtools_split:
     input:
@@ -144,19 +166,3 @@ rule nanosv_cat:
         # "logs/{aligner}/npinv/{sample}.log"
     # shell:
         # "npinv --input {input} --output {output}"
-
-# rule pbsv:
-    # input:
-        # bam = "minimap2_pbsv/alignment_pooled/{sample}.bam",
-        # bai = "minimap2_pbsv/alignment_pooled/{sample}.bam.bai",
-        # genome = config["genome"],
-    # output:
-        # vcf = "minimap2_pbsv/pbsv/{sample}.vcf",
-        # svsig = temp("minimap2_pbsv/pbsv/{sample}.svsig.gz"),
-    # log:
-        # "logs/minimap2_pbsv/pbsv/{sample}.log"
-    # shell:
-        # """
-        # pbsv discover {input.bam} {output.svsig} && \
-        # pbsv call {input.genome} {output.svsig} {output.vcf}
-        #"""

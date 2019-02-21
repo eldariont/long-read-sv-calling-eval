@@ -13,5 +13,7 @@ truth:
 parameters:
     minimap_preset: asm20
     ngmlr_preset: pacbio
+    pbmm_prset: CCS
     survivor_distance: 500
     svim_cluster_max_distance: 1.4
+    min_sv_size: 40

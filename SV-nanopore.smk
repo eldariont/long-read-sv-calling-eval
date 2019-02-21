@@ -40,20 +40,26 @@ rule minimap2:
 
 rule minimap2_pbsv:
     input:
-        expand("minimap2_pbsv/SV-plots/SV-length_{caller}_genotypes_{sample}.png",
-               sample=config["samples"],
-               caller=["sniffles", "nanosv"]),
-        expand("minimap2_pbsv/SV-plots/SV-{caller}_carriers.png",
-               caller=["sniffles", "nanosv"]),
-        expand("minimap2_pbsv/{caller}_combined/sorted_genotypes.vcf",
-               caller=["sniffles", "nanosv"]),
-        expand("minimap2_pbsv/alignment_stats/{sample}.txt",
-               sample=config["samples"]),
-        "minimap2_pbsv/all_combined/sorted_genotypes.vcf",
+        #Alignments
+        "minimap2_pbsv/alignment_stats/alignment_stats.txt",
         "minimap2_pbsv/mosdepth/regions.combined.gz",
         "minimap2_pbsv/mosdepth_global_plot/global.html",
-        # expand("minimap2_pbsv/npinv/{sample}.vcf",
-        #       sample=config["samples"]),
+        #SV lengths
+        expand("minimap2_pbsv/SV-plots/SV-length_sniffles_{minsupport}_pooled.png",
+                minsupport=range(1, 42, 5)),
+        expand("minimap2_pbsv/SV-plots/SV-length_svim_{minscore}_pooled.png",
+                minscore=range(1, 100, 5)),
+        expand("minimap2_pbsv/SV-plots/SV-length_pbsv_{minscore}_pooled.png",
+                minscore=range(10, 91, 10)),
+        #Carriers
+        expand("minimap2_pbsv/SV-plots/SV-sniffles_{minsupport}_carriers.png",
+               minsupport=range(1, 42, 5)),
+        expand("minimap2_pbsv/SV-plots/SV-pbsv_{minsupport}_carriers.png",
+               minsupport=range(10, 91, 10)),
+        #Evaluation
+        "minimap2_pbsv/eval/pooled/tools_pr.png",
+        expand("minimap2_pbsv/eval/pooled.subsampled.{fraction}/tools_pr.png", fraction=range(10, 91, 10)),
+        expand("minimap2_pbsv/eval/pooled/{caller}_pr_multiple_coverages.png", caller=["sniffles", "svim", "pbsv"])
 
 rule minimap2_last_like:
     input:
