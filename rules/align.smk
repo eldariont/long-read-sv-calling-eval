@@ -8,12 +8,14 @@ rule minimap2_align:
         genome = config["genome"]
     output:
         "minimap2/alignment/{sample}.bam"
+    params:
+        preset = config["parameters"]["minimap_preset"]
     threads:
         8
     log:
         "logs/minimap2/{sample}.log"
     shell:
-        "minimap2 --MD -ax map-ont -t {threads} {input.genome} {input.fq}/*.fastq.gz | \
+        "minimap2 --MD -ax {params.preset} -t {threads} {input.genome} {input.fq} | \
          samtools sort -@ {threads} -o {output} - 2> {log}"
 
 rule minimap2_pbsv_align:
@@ -25,15 +27,16 @@ rule minimap2_pbsv_align:
     threads:
         8
     params:
-        sample = "{sample}"
+        sample = "{sample}",
+        preset = config["parameters"]["minimap_preset"]
     log:
         "logs/minimap2_pbsv/{sample}.log"
     shell:
         """
-        minimap2 -ax map-ont --eqx -L -O 5,56 -E 4,1 -B 5 \
+        minimap2 -ax {params.preset} --eqx -L -O 5,56 -E 4,1 -B 5 \
          --secondary=no -z 400,50 -r 2k -Y \
          -R "@RG\tID:rg1a\tSM:{params.sample}" \
-         -t {threads} {input.genome} {input.fq}/*.fastq.gz | \
+         -t {threads} {input.genome} {input.fq} | \
          samtools sort -@ {threads} -o {output} - 2> {log}"""
 
 rule ngmlr_align:
@@ -42,13 +45,15 @@ rule ngmlr_align:
         genome = config["genome"]
     output:
         protected("ngmlr/alignment/{sample}.bam")
+    params:
+        preset = config["parameters"]["ngmlr_preset"]
     threads:
         36
     log:
         "logs/ngmlr/{sample}.log"
     shell:
-        "zcat {input.fq}/*.fastq.gz | \
-         ngmlr --presets ont -t {threads} -r {input.genome} | \
+        "zcat {input.fq} | \
+         ngmlr --presets {params.preset} -t {threads} -r {input.genome} | \
          samtools sort -@ {threads} -o {output} - 2> {log}"
 
 rule minimap2_last_like_align:
@@ -57,12 +62,14 @@ rule minimap2_last_like_align:
         genome = config["genome"]
     output:
         "minimap2_last_like/alignment/{sample}.bam"
+    params:
+        preset = config["parameters"]["minimap_preset"]
     threads:
         8
     log:
         "logs/minimap2_last_like/{sample}.log"
     shell:
-        "minimap2 --MD -ax map-ont --no-long-join -r50 -t {threads} {input.genome} {input.fq}/*.fastq.gz | \
+        "minimap2 --MD -ax {params.preset} --no-long-join -r50 -t {threads} {input.genome} {input.fq} | \
          samtools sort -@ {threads} -o {output} - 2> {log}"
 
 rule samtools_index:

@@ -16,11 +16,13 @@ rule svim_call:
         "{aligner}/alignment_pooled/{sample}.bam"
     output:
         "{aligner}/svim_calls/{sample}/final_results.vcf"
+    params:
+        max_distance = config["parameters"]["svim_cluster_max_distance"]
     threads: 1
     log:
         "logs/{aligner}/svim_call/{sample}.log"
     shell:
-        "svim alignment --sample {wildcards.sample} \
+        "svim alignment --sample {wildcards.sample} --cluster_max_distance {params.max_distance} \
          {wildcards.aligner}/svim_calls/{wildcards.sample}/ {input} 2> {log}"
 
 rule filter_svim:

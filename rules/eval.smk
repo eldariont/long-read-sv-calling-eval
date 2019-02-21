@@ -30,7 +30,8 @@ rule tabix:
 rule callset_eval_svim:
     input:
         genome = config["genome"],
-        truth = config["truth"],
+        truth_vcf = config["truth"]["vcf"],
+        truth_bed = config["truth"]["bed"],
         calls = "{aligner}/svim_calls/{sample}.min_{minscore}.truvari.sorted.vcf.gz",
         index = "{aligner}/svim_calls/{sample}.min_{minscore}.truvari.sorted.vcf.gz.tbi"
     output:
@@ -42,13 +43,14 @@ rule callset_eval_svim:
         "logs/{aligner}/truvari/pooled.svim.{sample}.{minscore}.log"
     shell:
         "rm -r {params.out_dir} && /project/pacbiosv/bin/truvari/truvari.py -f {input.genome}\
-                    -b {input.truth} -c {input.calls} -o {params.out_dir}\
-                    --passonly -r 1000 -p 0.00 2> {log}"
+                    -b {input.truth_vcf} -c {input.calls} -o {params.out_dir}\
+                    --passonly --includebed {input.truth_bed} --giabreport -r 1000 -p 0.00 2> {log}"
 
 rule callset_eval_sniffles:
     input:
         genome = config["genome"],
-        truth = config["truth"],
+        truth_vcf = config["truth"]["vcf"],
+        truth_bed = config["truth"]["bed"],
         calls = "{aligner}/sniffles_calls/{sample}.min_{minscore}.sorted.vcf.gz",
         index = "{aligner}/sniffles_calls/{sample}.min_{minscore}.sorted.vcf.gz.tbi"
     output:
@@ -60,8 +62,8 @@ rule callset_eval_sniffles:
         "logs/{aligner}/truvari/pooled.sniffles.{sample}.{minscore}.log"
     shell:
         "rm -r {params.out_dir} && /project/pacbiosv/bin/truvari/truvari.py -f {input.genome}\
-                    -b {input.truth} -c {input.calls} -o {params.out_dir}\
-                    --passonly -r 1000 -p 0.00 2> {log}"
+                    -b {input.truth_vcf} -c {input.calls} -o {params.out_dir}\
+                    --passonly --includebed {input.truth_bed} --giabreport -r 1000 -p 0.00 2> {log}"
 
 
 rule reformat_truvari_results:
