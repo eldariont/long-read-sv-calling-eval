@@ -57,9 +57,9 @@ rule minimap2_pbsv:
         expand("minimap2_pbsv/SV-plots/SV-pbsv_{minsupport}_carriers.png",
                minsupport=range(config["minimums"]["pbsv_from"], config["minimums"]["pbsv_to"], config["minimums"]["pbsv_step"])),
         #Evaluation
-        "minimap2_pbsv/eval/pooled/tools_pr.png",
-        expand("minimap2_pbsv/eval/pooled.subsampled.{fraction}/tools_pr.png", fraction=range(10, 91, 10)),
-        expand("minimap2_pbsv/eval/pooled/{caller}_pr_multiple_coverages.png", caller=["sniffles", "svim", "pbsv"])
+        "minimap2_pbsv/eval/pooled/tools_pr_svim_pbsv.png",
+        expand("minimap2_pbsv/eval/pooled.subsampled.{fraction}/tools_pr_svim_pbsv.png", fraction=range(10, 91, 10)),
+        expand("minimap2_pbsv/eval/pooled/{caller}_pr_multiple_coverages.png", caller=["svim", "pbsv"])
 
 rule minimap2_last_like:
     input:

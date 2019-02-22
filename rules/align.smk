@@ -25,9 +25,10 @@ rule pbmm_index:
         index = config["genome"] + ".mmi"
     params:
         preset = config["parameters"]["pbmm_preset"]
-    threads: 1
+    threads: 2
     shell:
-        "pbmm2 index {input.genome} {output.index} --preset {params.preset}"
+        "pbmm2 index --num-threads {threads} --preset {params.preset} \
+        {input.genome} {output.index}"
 
 rule pbmm_align:
     input:
@@ -44,8 +45,9 @@ rule pbmm_align:
         "logs/minimap2_pbsv/{sample}.log"
     shell:
         """
-        pbmm2 align {input.index} {input.fq} {output} --preset {params.preset} \
-                --sort --rg '@RG\tID:rg1a\tSM:{params.sample}' --sample HG2 2> {log}
+        pbmm2 align --preset {params.preset} --alignment-threads {threads} \
+        --sort --rg '@RG\tID:rg1a\tSM:{params.sample}' --sample HG2 \
+        {input.index} {input.fq} {output}  2> {log}
         """
 
 rule ngmlr_align:
@@ -83,12 +85,12 @@ rule minimap2_last_like_align:
 
 rule samtools_index:
     input:
-        "{aligner}/alignment/{sample}.bam"
+        "{aligner}/{subdir}/{sample}.bam"
     output:
-        "{aligner}/alignment/{sample}.bam.bai"
+        "{aligner}/{subdir}/{sample}.bam.bai"
     threads: 4
     log:
-        "logs/{aligner}/samtools_index/{sample}.log"
+        "logs/{aligner}/samtools_index/{subdir}.{sample}.log"
     shell:
         "samtools index -@ {threads} {input} 2> {log}"
 

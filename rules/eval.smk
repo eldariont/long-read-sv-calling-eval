@@ -73,12 +73,12 @@ rule callset_eval_pbsv:
         calls = "{aligner}/pbsv_calls/{sample}.min_{minscore}.sorted.vcf.gz",
         index = "{aligner}/pbsv_calls/{sample}.min_{minscore}.sorted.vcf.gz.tbi"
     output:
-        "{aligner}/sniffles_results/{sample}/{minscore}/summary.txt"
+        "{aligner}/pbsv_results/{sample}/{minscore}/summary.txt"
     params:
-        out_dir="{aligner}/sniffles_results/{sample}/{minscore}"
+        out_dir="{aligner}/pbsv_results/{sample}/{minscore}"
     threads: 1
     log:
-        "logs/{aligner}/truvari/pooled.sniffles.{sample}.{minscore}.log"
+        "logs/{aligner}/truvari/pooled.pbsv.{sample}.{minscore}.log"
     shell:
         "rm -r {params.out_dir} && /project/pacbiosv/bin/truvari/truvari.py -f {input.genome}\
                     -b {input.truth_vcf} -c {input.calls} -o {params.out_dir}\
@@ -94,13 +94,23 @@ rule reformat_truvari_results:
         "cat {input} | grep 'precision\|recall' | tr -d ',' |sed 's/^[ \t]*//' | tr -d '\"' | tr -d ' ' | tr ':' '\t' | awk 'OFS=\"\\t\" {{ print \"{wildcards.caller}\", \"{wildcards.sample}\", {wildcards.minscore}, $1, $2 }}' > {output}"
 
 
-rule cat_truvari_results:
+rule cat_truvari_results_all:
     input:
         expand("{{aligner}}/svim_results/{{sample}}/{minscore}/pr_rec.txt", minscore=range(config["minimums"]["svim_from"], config["minimums"]["svim_to"], config["minimums"]["svim_step"])),
         expand("{{aligner}}/sniffles_results/{{sample}}/{minscore}/pr_rec.txt", minscore=range(config["minimums"]["sniffles_from"], config["minimums"]["sniffles_to"], config["minimums"]["sniffles_step"])),
         expand("{{aligner}}/pbsv_results/{{sample}}/{minscore}/pr_rec.txt", minscore=range(config["minimums"]["pbsv_from"], config["minimums"]["pbsv_to"], config["minimums"]["pbsv_step"]))
     output:
         "{aligner}/eval/{sample}/all_results.txt"
+    threads: 1
+    shell:
+        "cat {input} > {output}"
+
+rule cat_truvari_results_nosniffles:
+    input:
+        expand("{{aligner}}/svim_results/{{sample}}/{minscore}/pr_rec.txt", minscore=range(1, 100, 5)),
+        expand("{{aligner}}/pbsv_results/{{sample}}/{minscore}/pr_rec.txt", minscore=range(10, 91, 10))
+    output:
+        "{aligner}/eval/{sample}/svim_pbsv_results.txt"
     threads: 1
     shell:
         "cat {input} > {output}"
@@ -136,7 +146,18 @@ rule plot_pr_tools:
     input:
         "{aligner}/eval/{sample}/all_results.txt"
     output:
-        "{aligner}/eval/{sample}/tools_pr.png"
+        "{aligner}/eval/{sample}/tools_pr_all.png"
+    threads: 1
+    log:
+        "logs/{aligner}/rplot/pooled.tools.pr.log"
+    shell:
+        "Rscript --vanilla scripts/plot-pr-tools.R {input} {output} > {log}"
+
+rule plot_pr_tools_nosniffles:
+    input:
+        "{aligner}/eval/{sample}/svim_pbsv_results.txt"
+    output:
+        "{aligner}/eval/{sample}/tools_pr_svim_pbsv.png"
     threads: 1
     log:
         "logs/{aligner}/rplot/{sample}.tools.pr.log"
