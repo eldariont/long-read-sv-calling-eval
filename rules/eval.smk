@@ -149,7 +149,7 @@ rule plot_pr_tools:
         "{aligner}/eval/{sample}/tools_pr_all.png"
     threads: 1
     log:
-        "logs/{aligner}/rplot/pooled.tools.pr.log"
+        "logs/{aligner}/rplot/{sample}.tools.pr.log"
     shell:
         "Rscript --vanilla scripts/plot-pr-tools.R {input} {output} > {log}"
 

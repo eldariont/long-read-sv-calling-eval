@@ -43,11 +43,15 @@ def make_plot(dict_of_lengths, output):
      and uses log scaling on the y-axis
     """
     standard_order = ['DEL', 'INS', 'DUP', 'INV']
-    spec_order = sorted([i for i in dict_of_lengths.keys() if i not in standard_order])
-    sorter = standard_order + spec_order
-    names, lengths = zip(
-        *sorted([(svtype, lengths) for svtype, lengths in dict_of_lengths.items()],
-                key=lambda x: sorter.index(x[0])))
+    if len(dict_of_lengths.keys()) > 0:
+        spec_order = sorted([i for i in dict_of_lengths.keys() if i not in standard_order])
+        sorter = standard_order + spec_order
+        names, lengths = zip(
+            *sorted([(svtype, lengths) for svtype, lengths in dict_of_lengths.items()],
+                    key=lambda x: sorter.index(x[0])))
+    else:
+        names = []
+        lengths = []
     plt.subplot(2, 1, 1)
     plt.hist(x=lengths,
              bins=[i for i in range(0, 2000, 10)],

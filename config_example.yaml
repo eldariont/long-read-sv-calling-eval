@@ -25,6 +25,6 @@ minimums:
     svim_from: 1
     svim_to: 100
     svim_step: 5
-    svim_from: 10
-    svim_to: 91
-    svim_step: 10
+    pbsv_from: 10
+    pbsv_to: 91
+    pbsv_step: 10

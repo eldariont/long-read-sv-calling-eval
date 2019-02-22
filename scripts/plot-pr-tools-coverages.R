@@ -11,6 +11,7 @@ res %>%
     ggplot(aes(precision, recall, color=sample)) +
       geom_point(size=1.5) +
       geom_path() +
+      coord_cartesian(xlim=c(0,1), ylim=c(0,1)) +
       theme_bw()
 
 ggsave(args[2], width=6, height=5)
