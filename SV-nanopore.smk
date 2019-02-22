@@ -22,13 +22,13 @@ rule minimap2:
         "minimap2/mosdepth_global_plot/global.html",
         #SV lengths
         expand("minimap2/SV-plots/SV-length_sniffles_{minsupport}_pooled.png",
-                minsupport=range(1, 42, 5)),
+                minsupport=range(config["minimums"]["sniffles_from"], config["minimums"]["sniffles_to"], config["minimums"]["sniffles_step"])),
         expand("minimap2/SV-plots/SV-length_svim_{minscore}_pooled.png",
-                minscore=range(1, 100, 5)),
+                minscore=range(config["minimums"]["svim_from"], config["minimums"]["svim_to"], config["minimums"]["svim_step"])),
         #"minimap2/SV-plots/SV-length_nanosv_pooled.png",
         #Carriers
         expand("minimap2/SV-plots/SV-sniffles_{minsupport}_carriers.png",
-               minsupport=range(1, 42, 5)),
+               minsupport=range(config["minimums"]["sniffles_from"], config["minimums"]["sniffles_to"], config["minimums"]["sniffles_step"])),
         #Evaluation
         "minimap2/eval/pooled/tools_pr.png",
         expand("minimap2/eval/pooled.subsampled.{fraction}/tools_pr.png", fraction=range(10, 91, 10)),
@@ -46,16 +46,16 @@ rule minimap2_pbsv:
         "minimap2_pbsv/mosdepth_global_plot/global.html",
         #SV lengths
         expand("minimap2_pbsv/SV-plots/SV-length_sniffles_{minsupport}_pooled.png",
-                minsupport=range(1, 42, 5)),
+                minsupport=range(config["minimums"]["sniffles_from"], config["minimums"]["sniffles_to"], config["minimums"]["sniffles_step"])),
         expand("minimap2_pbsv/SV-plots/SV-length_svim_{minscore}_pooled.png",
-                minscore=range(1, 100, 5)),
+                minscore=range(config["minimums"]["svim_from"], config["minimums"]["svim_to"], config["minimums"]["svim_step"])),
         expand("minimap2_pbsv/SV-plots/SV-length_pbsv_{minscore}_pooled.png",
-                minscore=range(10, 91, 10)),
+                minscore=range(config["minimums"]["pbsv_from"], config["minimums"]["pbsv_to"], config["minimums"]["pbsv_step"])),
         #Carriers
         expand("minimap2_pbsv/SV-plots/SV-sniffles_{minsupport}_carriers.png",
-               minsupport=range(1, 42, 5)),
+               minsupport=range(config["minimums"]["sniffles_from"], config["minimums"]["sniffles_to"], config["minimums"]["sniffles_step"])),
         expand("minimap2_pbsv/SV-plots/SV-pbsv_{minsupport}_carriers.png",
-               minsupport=range(10, 91, 10)),
+               minsupport=range(config["minimums"]["pbsv_from"], config["minimums"]["pbsv_to"], config["minimums"]["pbsv_step"])),
         #Evaluation
         "minimap2_pbsv/eval/pooled/tools_pr.png",
         expand("minimap2_pbsv/eval/pooled.subsampled.{fraction}/tools_pr.png", fraction=range(10, 91, 10)),

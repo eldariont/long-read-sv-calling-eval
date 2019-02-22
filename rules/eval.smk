@@ -96,9 +96,9 @@ rule reformat_truvari_results:
 
 rule cat_truvari_results:
     input:
-        expand("{{aligner}}/svim_results/{{sample}}/{minscore}/pr_rec.txt", minscore=range(1, 100, 5)),
-        expand("{{aligner}}/sniffles_results/{{sample}}/{minscore}/pr_rec.txt", minscore=range(1, 42, 5)),
-        expand("{{aligner}}/pbsv_results/{{sample}}/{minscore}/pr_rec.txt", minscore=range(10, 91, 10))
+        expand("{{aligner}}/svim_results/{{sample}}/{minscore}/pr_rec.txt", minscore=range(config["minimums"]["svim_from"], config["minimums"]["svim_to"], config["minimums"]["svim_step"])),
+        expand("{{aligner}}/sniffles_results/{{sample}}/{minscore}/pr_rec.txt", minscore=range(config["minimums"]["sniffles_from"], config["minimums"]["sniffles_to"], config["minimums"]["sniffles_step"])),
+        expand("{{aligner}}/pbsv_results/{{sample}}/{minscore}/pr_rec.txt", minscore=range(config["minimums"]["pbsv_from"], config["minimums"]["pbsv_to"], config["minimums"]["pbsv_step"]))
     output:
         "{aligner}/eval/{sample}/all_results.txt"
     threads: 1
@@ -107,7 +107,7 @@ rule cat_truvari_results:
 
 rule cat_truvari_results_svim_multiple_coverages:
     input:
-        expand("{{aligner}}/svim_results/{{sample}}.subsampled.{fraction}/{minscore}/pr_rec.txt", fraction=range(10, 91, 10), minscore=range(1, 100, 5))
+        expand("{{aligner}}/svim_results/{{sample}}.subsampled.{fraction}/{minscore}/pr_rec.txt", fraction=range(10, 91, 10), minscore=range(config["minimums"]["svim_from"], config["minimums"]["svim_to"], config["minimums"]["svim_step"]))
     output:
         "{aligner}/eval/{sample}/svim_results_multiple_coverages.txt"
     threads: 1
@@ -116,7 +116,7 @@ rule cat_truvari_results_svim_multiple_coverages:
 
 rule cat_truvari_results_sniffles_multiple_coverages:
     input:
-        expand("{{aligner}}/sniffles_results/{{sample}}.subsampled.{fraction}/{minscore}/pr_rec.txt", fraction=range(10, 91, 10), minscore=range(1, 42, 5))
+        expand("{{aligner}}/sniffles_results/{{sample}}.subsampled.{fraction}/{minscore}/pr_rec.txt", fraction=range(10, 91, 10), minscore=range(config["minimums"]["sniffles_from"], config["minimums"]["sniffles_to"], config["minimums"]["sniffles_step"]))
     output:
         "{aligner}/eval/{sample}/sniffles_results_multiple_coverages.txt"
     threads: 1
@@ -125,7 +125,7 @@ rule cat_truvari_results_sniffles_multiple_coverages:
 
 rule cat_truvari_results_pbsv_multiple_coverages:
     input:
-        expand("{{aligner}}/pbsv_results/{{sample}}.subsampled.{fraction}/{minscore}/pr_rec.txt", fraction=range(10, 91, 10), minscore=range(10, 91, 10))
+        expand("{{aligner}}/pbsv_results/{{sample}}.subsampled.{fraction}/{minscore}/pr_rec.txt", fraction=range(10, 91, 10), minscore=range(config["minimums"]["pbsv_from"], config["minimums"]["pbsv_to"], config["minimums"]["pbsv_step"]))
     output:
         "{aligner}/eval/{sample}/pbsv_results_multiple_coverages.txt"
     threads: 1

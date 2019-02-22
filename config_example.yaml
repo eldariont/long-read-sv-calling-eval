@@ -17,3 +17,14 @@ parameters:
     survivor_distance: 500
     svim_cluster_max_distance: 1.4
     min_sv_size: 40
+
+minimums:
+    sniffles_from: 1
+    sniffles_to: 42
+    sniffles_step: 5
+    svim_from: 1
+    svim_to: 100
+    svim_step: 5
+    svim_from: 10
+    svim_to: 91
+    svim_step: 10
