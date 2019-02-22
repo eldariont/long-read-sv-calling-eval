@@ -5,7 +5,7 @@ rule sort_calls:
         "{aligner}/{caller}_calls/{sample}.min_{minscore,[0-9]+}{postprocessed,\.truvari|}.sorted.vcf"
     threads: 1
     log:
-        "logs/{aligner}/bcftools_sort/sorting_{caller}_{sample}_{minscore}.log"
+        "logs/{aligner}/bcftools_sort/sorting_{caller}_{sample}_{minscore}{postprocessed}.log"
     shell:
         "bcftools sort {input} > {output} 2> {log}"
 
@@ -139,7 +139,7 @@ rule plot_pr_tools:
         "{aligner}/eval/{sample}/tools_pr.png"
     threads: 1
     log:
-        "logs/{aligner}/rplot/pooled.tools.pr.log"
+        "logs/{aligner}/rplot/{sample}.tools.pr.log"
     shell:
         "Rscript --vanilla scripts/plot-pr-tools.R {input} {output} > {log}"
 
@@ -150,6 +150,6 @@ rule plot_pr_tools_multiple_coverages:
         "{aligner}/eval/{sample}/{caller}_pr_multiple_coverages.png"
     threads: 1
     log:
-        "logs/{aligner}/rplot/pooled.{caller}.pr.coverages.log"
+        "logs/{aligner}/rplot/{sample}.{caller}.pr.coverages.log"
     shell:
         "Rscript --vanilla scripts/plot-pr-tools-coverages.R {input} {output} > {log}"

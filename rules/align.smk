@@ -123,6 +123,6 @@ rule subsample_alignments:
     params:
         additional_threads = 3
     log:
-        "logs/{aligner}/samtools_view/subsample.log"
+        "logs/{aligner}/samtools_view/subsample.{fraction}.log"
     shell:
         "samtools view -s 10.{wildcards.fraction} -@ {params.additional_threads} -b {input} -o {output}"

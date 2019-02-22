@@ -41,7 +41,7 @@ rule filter_svim:
 
 rule reformat_svim_calls_for_truvari:
     input:
-        "{aligner}/svim_calls/{sample}.min_{minscore,[0-9]+}.vcf"
+        "{aligner}/svim_calls/{sample}.min_{minscore}.vcf"
     output:
         "{aligner}/svim_calls/{sample}.min_{minscore,[0-9]+}.truvari.vcf"
     threads: 1
