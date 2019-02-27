@@ -30,8 +30,8 @@ rule minimap2:
         expand("minimap2/SV-plots/SV-sniffles_{minsupport}_carriers.png",
                minsupport=range(config["minimums"]["sniffles_from"], config["minimums"]["sniffles_to"], config["minimums"]["sniffles_step"])),
         #Evaluation
-        "minimap2/eval/pooled/tools_pr.png",
-        expand("minimap2/eval/pooled.subsampled.{fraction}/tools_pr.png", fraction=range(10, 91, 10)),
+        "minimap2/eval/pooled/tools_pr_svim_sniffles.png",
+        expand("minimap2/eval/pooled.subsampled.{fraction}/tools_pr_svim_sniffles.png", fraction=range(10, 91, 10)),
         expand("minimap2/eval/pooled/{caller}_pr_multiple_coverages.png", caller=["sniffles", "svim"])
         #"minimap2/SV-plots/SV-nanosv_carriers.png",
         #"minimap2/pooled_combined/genotypes.sorted.vcf",
@@ -82,17 +82,20 @@ rule minimap2_last_like:
 
 rule ngmlr:
     input:
-        expand("ngmlr/SV-plots/SV-length_{caller}_genotypes_{sample}.png",
-               sample=config["samples"],
-               caller=["sniffles", "nanosv", "svim"]),
-        expand("ngmlr/SV-plots/SV-{caller}_carriers.png",
-               caller=["sniffles", "nanosv"]),
-        expand("ngmlr/{caller}_combined/sorted_genotypes.vcf",
-               caller=["sniffles", "nanosv", "svim"]),
-        expand("ngmlr/alignment_stats/{sample}.txt",
-               sample=config["samples"]),
-        # expand("ngmlr/npinv/{sample}.vcf",
-        #       sample=config["samples"]),
-        "ngmlr/all_combined/sorted_genotypes.vcf",
+        #Alignments
+        "ngmlr/alignment_stats/alignment_stats.txt",
         "ngmlr/mosdepth/regions.combined.gz",
         "ngmlr/mosdepth_global_plot/global.html",
+        #SV lengths
+        expand("ngmlr/SV-plots/SV-length_sniffles_{minsupport}_pooled.png",
+                minsupport=range(config["minimums"]["sniffles_from"], config["minimums"]["sniffles_to"], config["minimums"]["sniffles_step"])),
+        expand("ngmlr/SV-plots/SV-length_svim_{minscore}_pooled.png",
+                minscore=range(config["minimums"]["svim_from"], config["minimums"]["svim_to"], config["minimums"]["svim_step"])),
+        #"ngmlr/SV-plots/SV-length_nanosv_pooled.png",
+        #Carriers
+        expand("ngmlr/SV-plots/SV-sniffles_{minsupport}_carriers.png",
+               minsupport=range(config["minimums"]["sniffles_from"], config["minimums"]["sniffles_to"], config["minimums"]["sniffles_step"])),
+        #Evaluation
+        "ngmlr/eval/pooled/tools_pr_svim_sniffles.png",
+        expand("ngmlr/eval/pooled.subsampled.{fraction}/tools_pr_svim_sniffles.png", fraction=range(10, 91, 10)),
+        expand("ngmlr/eval/pooled/{caller}_pr_multiple_coverages.png", caller=["sniffles", "svim"])

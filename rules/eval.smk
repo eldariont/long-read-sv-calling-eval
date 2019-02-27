@@ -107,10 +107,20 @@ rule cat_truvari_results_all:
 
 rule cat_truvari_results_nosniffles:
     input:
-        expand("{{aligner}}/svim_results/{{sample}}/{minscore}/pr_rec.txt", minscore=range(1, 100, 5)),
-        expand("{{aligner}}/pbsv_results/{{sample}}/{minscore}/pr_rec.txt", minscore=range(10, 91, 10))
+        expand("{{aligner}}/svim_results/{{sample}}/{minscore}/pr_rec.txt", minscore=range(config["minimums"]["svim_from"], config["minimums"]["svim_to"], config["minimums"]["svim_step"])),
+        expand("{{aligner}}/pbsv_results/{{sample}}/{minscore}/pr_rec.txt", minscore=range(config["minimums"]["pbsv_from"], config["minimums"]["pbsv_to"], config["minimums"]["pbsv_step"]))
     output:
         "{aligner}/eval/{sample}/svim_pbsv_results.txt"
+    threads: 1
+    shell:
+        "cat {input} > {output}"
+
+rule cat_truvari_results_nopbsv:
+    input:
+        expand("{{aligner}}/svim_results/{{sample}}/{minscore}/pr_rec.txt", minscore=range(config["minimums"]["svim_from"], config["minimums"]["svim_to"], config["minimums"]["svim_step"])),
+        expand("{{aligner}}/sniffles_results/{{sample}}/{minscore}/pr_rec.txt", minscore=range(config["minimums"]["sniffles_from"], config["minimums"]["sniffles_to"], config["minimums"]["sniffles_step"]))
+    output:
+        "{aligner}/eval/{sample}/svim_sniffles_results.txt"
     threads: 1
     shell:
         "cat {input} > {output}"
@@ -158,6 +168,17 @@ rule plot_pr_tools_nosniffles:
         "{aligner}/eval/{sample}/svim_pbsv_results.txt"
     output:
         "{aligner}/eval/{sample}/tools_pr_svim_pbsv.png"
+    threads: 1
+    log:
+        "logs/{aligner}/rplot/{sample}.tools.pr.log"
+    shell:
+        "Rscript --vanilla scripts/plot-pr-tools.R {input} {output} > {log}"
+
+rule plot_pr_tools_nopbsv:
+    input:
+        "{aligner}/eval/{sample}/svim_sniffles_results.txt"
+    output:
+        "{aligner}/eval/{sample}/tools_pr_svim_sniffles.png"
     threads: 1
     log:
         "logs/{aligner}/rplot/{sample}.tools.pr.log"
