@@ -47,8 +47,8 @@ rule reformat_svim_calls_for_truvari:
     threads: 1
     shell:
         "cat {input} | sed 's/INS:NOVEL/INS/g' | sed 's/DUP:INT/INS/g' | sed 's/DUP:TANDEM/INS/g' | \
-         awk '{{ if($1 ~ /^#/) {{ print $0 }} \
-         else {{ if($5==\"<DEL>\" || $5==\"<INS>\") {{ print $0 }} }} }}' > {output}"
+         awk 'OFS=\"\\t\" {{ if($1 ~ /^#/) {{ print $0 }} \
+         else {{ if($5==\"<DEL>\" || $5==\"<INS>\") {{ print $1, $2, $3, $4, $5, $6, \"PASS\", $8, $9, $10 }} }} }}' > {output}"
 
 rule sniffles_call:
     input:
