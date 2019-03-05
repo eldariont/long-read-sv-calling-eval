@@ -15,25 +15,26 @@ rule svim_call:
     input:
         "{aligner}/alignment_pooled/{sample}.bam"
     output:
-        "{aligner}/svim_calls/{sample}/final_results.vcf"
+        "{aligner}/svim_calls/{sample}/{run_name}_{max_distance}/final_results.vcf"
     params:
-        max_distance = config["parameters"]["svim_cluster_max_distance"],
+        working_dir = "{aligner}/svim_calls/{sample}/{run_name}_{max_distance}/",
+        #max_distance = config["parameters"]["svim_cluster_max_distance"],
         min_sv_size = config["parameters"]["min_sv_size"]
     threads: 1
     log:
-        "logs/{aligner}/svim_call/{sample}.log"
+        "logs/{aligner}/svim_call/{sample}/{run_name}_{max_distance}.log"
     shell:
-        "svim alignment --sample {wildcards.sample} --cluster_max_distance {params.max_distance} \
-         --min_sv_size {params.min_sv_size} {wildcards.aligner}/svim_calls/{wildcards.sample}/ {input} 2> {log}"
+        "svim alignment --sample {wildcards.sample} --cluster_max_distance {wildcards.max_distance} \
+         --min_sv_size {params.min_sv_size} {params.working_dir} {input} 2> {log}"
 
 rule filter_svim:
     input:
-        "{aligner}/svim_calls/{sample}/final_results.vcf"
+        "{aligner}/svim_calls/{sample}/{run_name}_{max_distance}/final_results.vcf"
     output:
-        "{aligner}/svim_calls/{sample}.min_{minscore,[0-9]+}.vcf"
+        "{aligner}/svim_calls/{sample}/{run_name}_{max_distance}/min_{minscore,[0-9]+}.vcf"
     threads: 1
     log:
-        "logs/{aligner}/svim_call/{sample}.filter.{minscore}.log"
+        "logs/{aligner}/svim_call/{sample}.filter.{run_name}.{max_distance}.{minscore}.log"
     shell:
         "cat {input} | \
          awk '{{ if($1 ~ /^#/) {{ print $0 }} \
@@ -41,9 +42,9 @@ rule filter_svim:
 
 rule reformat_svim_calls_for_truvari:
     input:
-        "{aligner}/svim_calls/{sample}.min_{minscore}.vcf"
+        "{aligner}/svim_calls/{sample}/{run_name}_{max_distance}/min_{minscore}.vcf"
     output:
-        "{aligner}/svim_calls/{sample}.min_{minscore,[0-9]+}.truvari.vcf"
+        "{aligner}/svim_calls/{sample}/{run_name}_{max_distance}/min_{minscore,[0-9]+}.truvari.vcf"
     threads: 1
     shell:
         "cat {input} | sed 's/INS:NOVEL/INS/g' | sed 's/DUP:INT/INS/g' | sed 's/DUP:TANDEM/INS/g' | \

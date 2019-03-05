@@ -15,16 +15,15 @@ parameters:
     ngmlr_preset: pacbio
     pbmm_preset: CCS
     survivor_distance: 500
-    svim_cluster_max_distance: 1.4
     min_sv_size: 40
 
 minimums:
     sniffles_from: 1
-    sniffles_to: 42
-    sniffles_step: 5
+    sniffles_to: 60
+    sniffles_step: 2
     svim_from: 1
     svim_to: 100
-    svim_step: 5
+    svim_step: 2
     pbsv_from: 10
     pbsv_to: 91
     pbsv_step: 10

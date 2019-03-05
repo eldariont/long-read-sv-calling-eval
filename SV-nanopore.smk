@@ -21,22 +21,19 @@ rule minimap2:
         "minimap2/mosdepth/regions.combined.gz",
         "minimap2/mosdepth_global_plot/global.html",
         #SV lengths
-        expand("minimap2/SV-plots/SV-length_sniffles_{minsupport}_pooled.png",
+        expand("minimap2/SV-plots/pooled/SV-length_sniffles_{minsupport}.png",
                 minsupport=range(config["minimums"]["sniffles_from"], config["minimums"]["sniffles_to"], config["minimums"]["sniffles_step"])),
-        expand("minimap2/SV-plots/SV-length_svim_{minscore}_pooled.png",
-                minscore=range(config["minimums"]["svim_from"], config["minimums"]["svim_to"], config["minimums"]["svim_step"])),
+        expand("minimap2/SV-plots/pooled/SV-length_svim_default_{max_distance}_{minscore}.png",
+                max_distance=[0.1, 0.2, 0.3, 0.4, 0.5], minscore=range(config["minimums"]["svim_from"], config["minimums"]["svim_to"], config["minimums"]["svim_step"])),
         #"minimap2/SV-plots/SV-length_nanosv_pooled.png",
         #Carriers
-        expand("minimap2/SV-plots/SV-sniffles_{minsupport}_carriers.png",
-               minsupport=range(config["minimums"]["sniffles_from"], config["minimums"]["sniffles_to"], config["minimums"]["sniffles_step"])),
+        expand("minimap2/SV-plots/pooled/SV-sniffles_{minsupport}_carriers.png",
+                minsupport=range(config["minimums"]["sniffles_from"], config["minimums"]["sniffles_to"], config["minimums"]["sniffles_step"])),
         #Evaluation
-        "minimap2/eval/pooled/tools_pr_svim_sniffles.png",
-        expand("minimap2/eval/pooled.subsampled.{fraction}/tools_pr_svim_sniffles.png", fraction=range(10, 91, 10)),
-        expand("minimap2/eval/pooled/{caller}_pr_multiple_coverages.png", caller=["sniffles", "svim"])
-        #"minimap2/SV-plots/SV-nanosv_carriers.png",
-        #"minimap2/pooled_combined/genotypes.sorted.vcf",
-        # expand("minimap2/npinv/{sample}.vcf",
-        #       sample=config["samples"]),
+        expand("minimap2/eval/pooled/{run_name}_{max_distance}/tools_pr_svim_sniffles.png", run_name=["default"], max_distance=[0.1, 0.2, 0.3, 0.4, 0.5]),
+        expand("minimap2/eval/pooled.subsampled.{fraction}/{run_name}_{max_distance}/tools_pr_svim_sniffles.png", run_name=["default"], max_distance=[0.1, 0.2, 0.3, 0.4, 0.5], fraction=range(10, 91, 10)),
+        expand("minimap2/eval/pooled/{run_name}_{max_distance}/svim_pr_multiple_coverages.png", run_name=["default"], max_distance=[0.1, 0.2, 0.3, 0.4, 0.5]),
+        expand("minimap2/eval/pooled/{caller}_pr_multiple_coverages.png", caller=["sniffles"])
 
 rule minimap2_pbsv:
     input:
