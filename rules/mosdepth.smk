@@ -2,8 +2,8 @@ configfile: "config.yaml"
 
 rule mosdepth_get:
     input:
-        bam = "{aligner}/alignment/{sample}.bam",
-        bai = "{aligner}/alignment/{sample}.bam.bai"
+        bam = "{aligner}/alignment_pooled/{sample}.bam",
+        bai = "{aligner}/alignment_pooled/{sample}.bam.bai"
     threads: 4
     output:
         protected("{aligner}/mosdepth/{sample}.mosdepth.global.dist.txt"),
@@ -23,7 +23,7 @@ rule mosdepth_get:
 
 rule mosdepth_combine:
     input:
-        expand("{{aligner}}/mosdepth/{sample}.regions.bed.gz", sample=config["samples"])
+        expand("{{aligner}}/mosdepth/{sample}.regions.bed.gz", sample=["pooled", "pooled.subsampled.50"])
     output:
         "{aligner}/mosdepth/regions.combined.gz"
     log:
@@ -35,7 +35,7 @@ rule mosdepth_combine:
 
 rule mosdepth_global_plot:
     input:
-        expand("{{aligner}}/mosdepth/{sample}.mosdepth.global.dist.txt", sample=config["samples"])
+        expand("{{aligner}}/mosdepth/{sample}.mosdepth.global.dist.txt", sample=["pooled", "pooled.subsampled.50"])
     output:
         "{aligner}/mosdepth_global_plot/global.html"
     log:
