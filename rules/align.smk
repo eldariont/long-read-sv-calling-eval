@@ -103,7 +103,7 @@ rule alignment_stats:
     log:
         "logs/{aligner}/alignment_stats/alignment_stats.log"
     shell:
-        os.path.join(workflow.basedir, "scripts/alignment_stats.py") + \
+        "python3 " + os.path.join(workflow.basedir, "scripts/alignment_stats.py") + \
             " -o {output} {input.bam} 2> {log}"
 
 rule pool_samples:
