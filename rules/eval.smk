@@ -116,31 +116,11 @@ rule reformat_truvari_results_svim:
 
 rule cat_truvari_results_all:
     input:
-        expand("{{aligner}}/svim_results/{{sample}}/{minscore}/pr_rec.txt", minscore=range(config["minimums"]["svim_from"], config["minimums"]["svim_to"], config["minimums"]["svim_step"])),
+        expand("{{aligner}}/svim_results/{{sample}}/{{parameters}}/{minscore}/pr_rec.txt", minscore=range(config["minimums"]["svim_from"], config["minimums"]["svim_to"], config["minimums"]["svim_step"])),
         expand("{{aligner}}/sniffles_results/{{sample}}/{minscore}/pr_rec.txt", minscore=range(config["minimums"]["sniffles_from"], config["minimums"]["sniffles_to"], config["minimums"]["sniffles_step"])),
         expand("{{aligner}}/pbsv_results/{{sample}}/{minscore}/pr_rec.txt", minscore=range(config["minimums"]["pbsv_from"], config["minimums"]["pbsv_to"], config["minimums"]["pbsv_step"]))
     output:
-        "{aligner}/eval/{sample}/all_results.txt"
-    threads: 1
-    shell:
-        "cat {input} > {output}"
-
-rule cat_truvari_results_nosniffles:
-    input:
-        expand("{{aligner}}/svim_results/{{sample}}/{minscore}/pr_rec.txt", minscore=range(config["minimums"]["svim_from"], config["minimums"]["svim_to"], config["minimums"]["svim_step"])),
-        expand("{{aligner}}/pbsv_results/{{sample}}/{minscore}/pr_rec.txt", minscore=range(config["minimums"]["pbsv_from"], config["minimums"]["pbsv_to"], config["minimums"]["pbsv_step"]))
-    output:
-        "{aligner}/eval/{sample}/svim_pbsv_results.txt"
-    threads: 1
-    shell:
-        "cat {input} > {output}"
-
-rule cat_truvari_results_nopbsv:
-    input:
-        expand("{{aligner}}/svim_results/{{sample}}/{{parameters}}/{minscore}/pr_rec.txt", minscore=range(config["minimums"]["svim_from"], config["minimums"]["svim_to"], config["minimums"]["svim_step"])),
-        expand("{{aligner}}/sniffles_results/{{sample}}/{minscore}/pr_rec.txt", minscore=range(config["minimums"]["sniffles_from"], config["minimums"]["sniffles_to"], config["minimums"]["sniffles_step"]))
-    output:
-        "{aligner}/eval/{sample}/{parameters}/svim_sniffles_results.txt"
+        "{aligner}/eval/{sample}/{parameters}/all_results.txt"
     threads: 1
     shell:
         "cat {input} > {output}"
@@ -174,31 +154,9 @@ rule cat_truvari_results_pbsv_multiple_coverages:
 
 rule plot_pr_tools:
     input:
-        "{aligner}/eval/{sample}/all_results.txt"
+        "{aligner}/eval/{sample}/{parameters}/all_results.txt"
     output:
-        "{aligner}/eval/{sample}/tools_pr_all.png"
-    threads: 1
-    log:
-        "logs/{aligner}/rplot/{sample}.tools.pr.log"
-    shell:
-        "Rscript --vanilla scripts/plot-pr-tools.R {input} {output} > {log}"
-
-rule plot_pr_tools_nosniffles:
-    input:
-        "{aligner}/eval/{sample}/svim_pbsv_results.txt"
-    output:
-        "{aligner}/eval/{sample}/tools_pr_svim_pbsv.png"
-    threads: 1
-    log:
-        "logs/{aligner}/rplot/{sample}.tools.pr.log"
-    shell:
-        "Rscript --vanilla scripts/plot-pr-tools.R {input} {output} > {log}"
-
-rule plot_pr_tools_nopbsv:
-    input:
-        "{aligner}/eval/{sample}/{parameters}/svim_sniffles_results.txt"
-    output:
-        "{aligner}/eval/{sample}/{parameters}/tools_pr_svim_sniffles.png"
+        "{aligner}/eval/{sample}/{parameters}/tools_pr_all.png"
     threads: 1
     log:
         "logs/{aligner}/rplot/{sample}.{parameters}.tools.pr.log"

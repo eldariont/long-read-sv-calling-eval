@@ -66,8 +66,8 @@ rule sniffles_call:
 
 rule pbsv:
     input:
-        bam = "{aligner}/alignment_pooled/{sample}.bam",
-        bai = "{aligner}/alignment_pooled/{sample}.bam.bai",
+        bam = "{aligner}_pbsv/alignment_pooled/{sample}.bam",
+        bai = "{aligner}_pbsv/alignment_pooled/{sample}.bam.bai",
         genome = config["genome"],
     output:
         vcf = "{aligner}/pbsv_calls/{sample}.min_{minpercent,[0-9]+}.vcf",
