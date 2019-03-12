@@ -7,7 +7,6 @@ include: "rules/plots.smk"
 include: "rules/align.smk"
 include: "rules/survivor.smk"
 include: "rules/callers.smk"
-include: "rules/vcf.smk"
 include: "rules/eval.smk"
 
 configfile: "config.yaml"
