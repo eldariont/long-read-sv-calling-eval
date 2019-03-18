@@ -23,7 +23,7 @@ rule mosdepth_get:
 
 rule mosdepth_combine:
     input:
-        expand("{{aligner}}/mosdepth/{sample}.regions.bed.gz", sample=["pooled", "pooled.subsampled.50"])
+        expand("{{aligner}}/mosdepth/{subset}.regions.bed.gz", subset=["pooled.subsampled.{0}".format(cov) for cov in range(10, 91, 10)] + ["pooled"])
     output:
         "{aligner}/mosdepth/regions.combined.gz"
     log:
@@ -35,7 +35,7 @@ rule mosdepth_combine:
 
 rule mosdepth_global_plot:
     input:
-        expand("{{aligner}}/mosdepth/{sample}.mosdepth.global.dist.txt", sample=["pooled", "pooled.subsampled.50"])
+        expand("{{aligner}}/mosdepth/{subset}.mosdepth.global.dist.txt", subset=["pooled.subsampled.{0}".format(cov) for cov in range(10, 91, 10)] + ["pooled"])
     output:
         "{aligner}/mosdepth_global_plot/global.html"
     log:
@@ -43,3 +43,18 @@ rule mosdepth_global_plot:
     shell:
         os.path.join(workflow.basedir, "scripts/mosdepth_plot-dist.py") + \
             " {input} -o {output} 2> {log}"
+
+
+rule compute_mean_converage:
+    input:
+        expand("{{aligner}}/mosdepth/{subset}.mosdepth.global.dist.txt", subset=["pooled.subsampled.{0}".format(cov) for cov in range(10, 91, 10)] + ["pooled"])
+    output:
+        "{aligner}/mosdepth/mean_coverages.txt"
+    log:
+        "logs/{aligner}/mosdepth/mosdepth_mean_coverage.log"
+    run:
+        shell("rm -f {output}")
+        for f in input:
+            short_name = f.split("/")[2][:-25]
+            shell("echo -n -e \"{short_name}\t\" >> {output}")
+            shell("python scripts/mosdepth_mean-depth.py {f} >> {output}")
