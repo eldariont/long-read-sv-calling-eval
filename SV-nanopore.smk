@@ -18,6 +18,7 @@ rule minimap2:
         #Alignments
         "minimap2/alignment_stats/alignment_stats.txt",
         "minimap2/mosdepth/regions.combined.gz",
+        "minimap2/mosdepth/mean_coverages.txt",
         "minimap2/mosdepth_global_plot/global.html",
         #SV lengths
         expand("minimap2/SV-plots/pooled/SV-length_sniffles_{minsupport}.png",

@@ -165,22 +165,24 @@ rule plot_pr_tools:
 
 rule plot_pr_tools_multiple_coverages:
     input:
-        "{aligner}/eval/{sample}/{caller}_results_multiple_coverages.txt"
+        results = "{aligner}/eval/{sample}/{caller}_results_multiple_coverages.{vcf}.txt",
+        coverages = "{aligner}/mosdepth/mean_coverages.txt"
     output:
         "{aligner}/eval/{sample}/{caller,sniffles|pbsv}_pr_multiple_coverages.png"
     threads: 1
     log:
         "logs/{aligner}/rplot/{sample}.{caller}.pr.coverages.log"
     shell:
-        "Rscript --vanilla scripts/plot-pr-tools-coverages.R {input} {output} > {log}"
+        "Rscript --vanilla scripts/plot-pr-tools-coverages.R {input.results} {input.coverages} {output} > {log}"
 
 rule plot_pr_tools_multiple_coverages_svim:
     input:
-        "{aligner}/eval/{sample}/{parameters}/svim_results_multiple_coverages.txt"
+        results = "{aligner}/eval/{sample}/{parameters}/svim_results_multiple_coverages.{vcf}.txt",
+        coverages = "{aligner}/mosdepth/mean_coverages.txt"
     output:
         "{aligner}/eval/{sample}/{parameters}/svim_pr_multiple_coverages.png"
     threads: 1
     log:
         "logs/{aligner}/rplot/{sample}.{parameters}.svim.pr.coverages.log"
     shell:
-        "Rscript --vanilla scripts/plot-pr-tools-coverages.R {input} {output} > {log}"
+        "Rscript --vanilla scripts/plot-pr-tools-coverages.R {input.results} {input.coverages} {output} > {log}"
