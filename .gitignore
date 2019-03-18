@@ -1,2 +1,7 @@
 .remote-sync.json
 config.yaml
+minimap2/*
+minimap2_pbsv/*
+logs/*
+Rplots.pdf
+.snakemake/*
