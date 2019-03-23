@@ -34,11 +34,11 @@ rule minimap2:
         expand("minimap2/SV-plots/pooled/SV-pbsv_{minsupport}_carriers.png",
                minsupport=range(config["minimums"]["pbsv_from"], config["minimums"]["pbsv_to"], config["minimums"]["pbsv_step"])),
         #Evaluation - Tool comparison
-        expand("minimap2/eval/pooled/{run_name}_{max_distance}/tools_pr_svim_sniffles.png", run_name=["default"], max_distance=[0.1, 0.2, 0.3, 0.4, 0.5]),
-        expand("minimap2/eval/pooled.subsampled.{fraction}/{run_name}_{max_distance}/tools_pr_svim_sniffles.png", run_name=["default"], max_distance=[0.1, 0.2, 0.3, 0.4, 0.5], fraction=range(10, 91, 10)),
+        expand("minimap2/eval/pooled/{run_name}_{max_distance}/tools_pr_all.{vcf}.png", run_name=["default"], max_distance=[0.1, 0.2, 0.3, 0.4, 0.5], vcf=["vcf", "vcf_het"]),
+        expand("minimap2/eval/pooled.subsampled.{fraction}/{run_name}_{max_distance}/tools_pr_all.{vcf}.png", run_name=["default"], max_distance=[0.1, 0.2, 0.3, 0.4, 0.5], fraction=range(10, 91, 10), vcf=["vcf", "vcf_het"]),
         #Evaluation - Coverage comparison
-        expand("minimap2/eval/pooled/{run_name}_{max_distance}/svim_pr_multiple_coverages.png", run_name=["default"], max_distance=[0.1, 0.2, 0.3, 0.4, 0.5]),
-        expand("minimap2/eval/pooled/{caller}_pr_multiple_coverages.png", caller=["sniffles", "pbsv"])
+        expand("minimap2/eval/pooled/{run_name}_{max_distance}/svim_pr_multiple_coverages.{vcf}.png", run_name=["default"], max_distance=[0.1, 0.2, 0.3, 0.4, 0.5], vcf=["vcf", "vcf_het"]),
+        expand("minimap2/eval/pooled/{caller}_pr_multiple_coverages.{vcf}.png", caller=["sniffles", "pbsv"], vcf=["vcf", "vcf_het"])
 
 
 rule ngmlr:
