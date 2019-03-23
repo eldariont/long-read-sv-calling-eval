@@ -67,22 +67,6 @@ rule ngmlr_align:
          ngmlr --presets {params.preset} -t {threads} -r {input.genome} | \
          samtools sort -@ {threads} -o {output} - 2> {log}"
 
-rule minimap2_last_like_align:
-    input:
-        fq = get_samples,
-        genome = config["genome"]
-    output:
-        "minimap2_last_like/alignment/{sample}.bam"
-    params:
-        preset = config["parameters"]["minimap_preset"]
-    threads:
-        8
-    log:
-        "logs/minimap2_last_like/{sample}.log"
-    shell:
-        "minimap2 --MD -ax {params.preset} --no-long-join -r50 -t {threads} {input.genome} {input.fq} | \
-         samtools sort -@ {threads} -o {output} - 2> {log}"
-
 rule samtools_index:
     input:
         "{aligner}/{subdir}/{sample}.bam"

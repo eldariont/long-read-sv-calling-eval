@@ -41,25 +41,6 @@ rule minimap2:
         expand("minimap2/eval/pooled/{caller}_pr_multiple_coverages.png", caller=["sniffles", "pbsv"])
 
 
-rule minimap2_last_like:
-    input:
-        expand("minimap2_last_like/SV-plots/SV-length_{caller}_genotypes_{sample}.png",
-               sample=config["samples"],
-               caller=["sniffles", "nanosv", "svim"]),
-        expand(
-            "minimap2_last_like/SV-plots/SV-{caller}_carriers.png",
-            caller=["sniffles", "nanosv"]),
-        expand("minimap2_last_like/{caller}_combined/sorted_genotypes.vcf",
-               caller=["sniffles", "nanosv", "svim"]),
-        expand("minimap2_last_like/alignment_stats/{sample}.txt",
-               sample=config["samples"]),
-        # expand("minimap2_last_like/npinv/{sample}.vcf",
-        #       sample=config["samples"]),
-        "minimap2_last_like/all_combined/sorted_genotypes.vcf",
-        "minimap2_last_like/mosdepth/regions.combined.gz",
-        "minimap2_last_like/mosdepth_global_plot/global.html",
-
-
 rule ngmlr:
     input:
         #Alignments
