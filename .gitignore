@@ -2,6 +2,9 @@
 config.yaml
 minimap2/*
 minimap2_pbsv/*
+fastq/*
 logs/*
+reference/*
+confidence_calls/*
 Rplots.pdf
 .snakemake/*
