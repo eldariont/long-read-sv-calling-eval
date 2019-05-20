@@ -36,7 +36,7 @@ rule filter_svim:
     log:
         "logs/{aligner}/svim_call/{sample}.filter.{run_name}.{max_distance}.{minscore}.log"
     shell:
-        "cat {input} | \
+        "grep -v \"hom_ref\" {input} | \
          awk '{{ if($1 ~ /^#/) {{ print $0 }} \
          else {{ if($6>={wildcards.minscore}) {{ print $0 }} }} }}' > {output}"
 
@@ -70,7 +70,7 @@ rule pbsv:
         bai = "{aligner}_pbsv/alignment_pooled/{sample}.bam.bai",
         genome = config["genome"],
     output:
-        vcf = "{aligner}/pbsv_calls/{sample}.min_{minpercent,[0-9]+}.vcf",
+        vcf = temp("{aligner}/pbsv_calls/{sample}.min_{minpercent,[0-9]+}.unfiltered.vcf"),
         svsig = temp("{aligner}/pbsv/{sample}.min_{minpercent}.svsig.gz")
     params:
         min_sv_size = config["parameters"]["min_sv_size"]
@@ -79,9 +79,20 @@ rule pbsv:
     shell:
         """
         pbsv discover {input.bam} {output.svsig} && \
-        pbsv call --min-sv-length {params.min_sv_size} \
+        pbsv call -A 1 -O 1 -S 0 -t INS,DEL --min-sv-length {params.min_sv_size} \
         --call-min-read-perc-one-sample {wildcards.minpercent} {input.genome} {output.svsig} {output.vcf}
         """
+
+rule filter_pbsv:
+    input:
+        "{aligner}/pbsv_calls/{sample}.min_{minpercent}.unfiltered.vcf"
+    output:
+        temp("{aligner}/pbsv_calls/{sample}.min_{minpercent,[0-9]+}.vcf")
+    threads: 1
+    log:
+        "logs/{aligner}/pbsv/{sample}.filter.{minpercent}.log"
+    shell:
+        "grep -v \"<CNV>\" {input} > {output}"
 
 rule samtools_split:
     input:
