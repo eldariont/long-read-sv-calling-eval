@@ -62,7 +62,7 @@ rule sniffles_call:
     log:
         "logs/{aligner}/sniffles_call/{sample}.{minsupport}.log"
     shell:
-        "sniffles --mapped_reads {input} --min_length {params.min_sv_size} --min_support {wildcards.minsupport} --vcf {output} --threads {threads} > {log}"
+        "sniffles --mapped_reads {input} --min_length {params.min_sv_size} --min_support {wildcards.minsupport} --vcf {output} --threads {threads} --genotype > {log}"
 
 rule pbsv:
     input:

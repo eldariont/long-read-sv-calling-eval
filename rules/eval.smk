@@ -69,6 +69,34 @@ rule callset_eval_svim:
                     --passonly --includebed {input.truth_bed} --giabreport -r 1000 -p 0.00 2> {log}"
 
 
+rule callset_eval_svim_gtcomp:
+    input:
+        genome = config["genome"],
+        truth_vcf = get_vcf,
+        truth_bed = config["truth"]["bed"],
+        calls = "{aligner}/svim_calls/{sample}/{parameters}/min_{minscore}.truvari.sorted.vcf.gz",
+        index = "{aligner}/svim_calls/{sample}/{parameters}/min_{minscore}.truvari.sorted.vcf.gz.tbi"
+    output:
+        temp("{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}.gt/base-filter.vcf"),
+        temp("{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}.gt/call-filter.vcf"),
+        "{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}.gt/fn.vcf",
+        "{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}.gt/fp.vcf",
+        "{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}.gt/giab_report.txt",
+        temp("{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}.gt/log.txt"),
+        "{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}.gt/summary.txt",
+        temp("{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}.gt/tp-base.vcf"),
+        "{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}.gt/tp-call.vcf"
+    params:
+        out_dir="{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}.gt"
+    threads: 1
+    log:
+        "logs/{aligner}/truvari/pooled.svim.{sample}.{parameters}.{minscore}.{vcf}.gt.log"
+    shell:
+        "rm -rf {params.out_dir} && /project/pacbiosv/bin/truvari/truvari.py -f {input.genome}\
+                    -b {input.truth_vcf} -c {input.calls} -o {params.out_dir}\
+                    --passonly --gtcomp --includebed {input.truth_bed} --giabreport -r 1000 -p 0.00 2> {log}"
+
+
 rule callset_eval:
     input:
         genome = config["genome"],
@@ -97,6 +125,34 @@ rule callset_eval:
                     --passonly --includebed {input.truth_bed} --giabreport -r 1000 -p 0.00 2> {log}"
 
 
+rule callset_eval_gtcomp:
+    input:
+        genome = config["genome"],
+        truth_vcf = get_vcf,
+        truth_bed = config["truth"]["bed"],
+        calls = "{aligner}/{caller}_calls/{sample}.min_{minscore}.sorted.vcf.gz",
+        index = "{aligner}/{caller}_calls/{sample}.min_{minscore}.sorted.vcf.gz.tbi"
+    output:
+        temp("{aligner}/{caller,sniffles|pbsv}_results/{sample}/{minscore}/{vcf}.gt/base-filter.vcf"),
+        temp("{aligner}/{caller,sniffles|pbsv}_results/{sample}/{minscore}/{vcf}.gt/call-filter.vcf"),
+        "{aligner}/{caller,sniffles|pbsv}_results/{sample}/{minscore}/{vcf}.gt/fn.vcf",
+        "{aligner}/{caller,sniffles|pbsv}_results/{sample}/{minscore}/{vcf}.gt/fp.vcf",
+        "{aligner}/{caller,sniffles|pbsv}_results/{sample}/{minscore}/{vcf}.gt/giab_report.txt",
+        temp("{aligner}/{caller,sniffles|pbsv}_results/{sample}/{minscore}/{vcf}.gt/log.txt"),
+        "{aligner}/{caller,sniffles|pbsv}_results/{sample}/{minscore}/{vcf}.gt/summary.txt",
+        temp("{aligner}/{caller,sniffles|pbsv}_results/{sample}/{minscore}/{vcf}.gt/tp-base.vcf"),
+        "{aligner}/{caller,sniffles|pbsv}_results/{sample}/{minscore}/{vcf}.gt/tp-call.vcf"
+    params:
+        out_dir="{aligner}/{caller}_results/{sample}/{minscore}/{vcf}.gt"
+    threads: 1
+    log:
+        "logs/{aligner}/truvari/pooled.{caller}.{sample}.{minscore}.{vcf}.gt.log"
+    shell:
+        "rm -rf {params.out_dir} && /project/pacbiosv/bin/truvari/truvari.py -f {input.genome}\
+                    -b {input.truth_vcf} -c {input.calls} -o {params.out_dir}\
+                    --passonly --gtcomp --includebed {input.truth_bed} --giabreport -r 1000 -p 0.00 2> {log}"
+
+
 rule reformat_truvari_results:
     input:
         "{aligner}/{caller}_results/{sample}/{minscore}/{vcf}/summary.txt"
@@ -108,7 +164,7 @@ rule reformat_truvari_results:
 
 rule reformat_truvari_results_svim:
     input:
-        "{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}.gt/summary.txt"
+        "{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}/summary.txt"
     output:
         temp("{aligner}/svim_results/{sample}/{parameters}/{minscore}/pr_rec.{vcf}.txt")
     threads: 1
