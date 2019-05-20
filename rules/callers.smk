@@ -31,7 +31,7 @@ rule filter_svim:
     input:
         "{aligner}/svim_calls/{sample}/{run_name}_{max_distance}/final_results.vcf"
     output:
-        "{aligner}/svim_calls/{sample}/{run_name}_{max_distance}/min_{minscore,[0-9]+}.vcf"
+        temp("{aligner}/svim_calls/{sample}/{run_name}_{max_distance}/min_{minscore,[0-9]+}.vcf")
     threads: 1
     log:
         "logs/{aligner}/svim_call/{sample}.filter.{run_name}.{max_distance}.{minscore}.log"
@@ -44,7 +44,7 @@ rule reformat_svim_calls_for_truvari:
     input:
         "{aligner}/svim_calls/{sample}/{run_name}_{max_distance}/min_{minscore}.vcf"
     output:
-        "{aligner}/svim_calls/{sample}/{run_name}_{max_distance}/min_{minscore,[0-9]+}.truvari.vcf"
+        temp("{aligner}/svim_calls/{sample}/{run_name}_{max_distance}/min_{minscore,[0-9]+}.truvari.vcf")
     threads: 1
     shell:
         "cat {input} | sed 's/INS:NOVEL/INS/g' | sed 's/DUP:INT/INS/g' | sed 's/DUP:TANDEM/INS/g' | \
@@ -55,7 +55,7 @@ rule sniffles_call:
     input:
         "{aligner}/alignment_pooled/{sample}.bam"
     output:
-        "{aligner}/sniffles_calls/{sample}.min_{minsupport,[0-9]+}.vcf"
+        temp("{aligner}/sniffles_calls/{sample}.min_{minsupport,[0-9]+}.vcf")
     params:
         min_sv_size = config["parameters"]["min_sv_size"]
     threads: 1

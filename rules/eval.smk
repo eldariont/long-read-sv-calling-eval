@@ -5,7 +5,7 @@ rule sort_calls:
     input:
         "{aligner}/{caller}_calls/{sample}.min_{minscore}.vcf"
     output:
-        "{aligner}/{caller,sniffles|pbsv}_calls/{sample}.min_{minscore,[0-9]+}.sorted.vcf"
+        temp("{aligner}/{caller,sniffles|pbsv}_calls/{sample}.min_{minscore,[0-9]+}.sorted.vcf")
     threads: 1
     log:
         "logs/{aligner}/bcftools_sort/sorting_{caller}_{sample}_{minscore}.log"
@@ -16,7 +16,7 @@ rule sort_calls_svim:
     input:
         "{aligner}/svim_calls/{sample}/{parameters}/min_{minscore}.truvari.vcf"
     output:
-        "{aligner}/svim_calls/{sample}/{parameters}/min_{minscore,[0-9]+}.truvari.sorted.vcf"
+        temp("{aligner}/svim_calls/{sample}/{parameters}/min_{minscore,[0-9]+}.truvari.sorted.vcf")
     threads: 1
     log:
         "logs/{aligner}/bcftools_sort/sorting_svim_{sample}_{parameters}_{minscore}.truvari.log"
@@ -49,7 +49,15 @@ rule callset_eval_svim:
         calls = "{aligner}/svim_calls/{sample}/{parameters}/min_{minscore}.truvari.sorted.vcf.gz",
         index = "{aligner}/svim_calls/{sample}/{parameters}/min_{minscore}.truvari.sorted.vcf.gz.tbi"
     output:
-        "{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}/summary.txt"
+        temp("{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}/base-filter.vcf"),
+        temp("{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}/call-filter.vcf"),
+        "{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}/fn.vcf",
+        "{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}/fp.vcf",
+        "{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}/giab_report.txt",
+        temp("{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}/log.txt"),
+        "{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}/summary.txt",
+        temp("{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}/tp-base.vcf"),
+        "{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}/tp-call.vcf"
     params:
         out_dir="{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}"
     threads: 1
@@ -69,7 +77,15 @@ rule callset_eval:
         calls = "{aligner}/{caller}_calls/{sample}.min_{minscore}.sorted.vcf.gz",
         index = "{aligner}/{caller}_calls/{sample}.min_{minscore}.sorted.vcf.gz.tbi"
     output:
-        "{aligner}/{caller,sniffles|pbsv}_results/{sample}/{minscore}/{vcf}/summary.txt"
+        temp("{aligner}/{caller,sniffles|pbsv}_results/{sample}/{minscore}/{vcf}/base-filter.vcf"),
+        temp("{aligner}/{caller,sniffles|pbsv}_results/{sample}/{minscore}/{vcf}/call-filter.vcf"),
+        "{aligner}/{caller,sniffles|pbsv}_results/{sample}/{minscore}/{vcf}/fn.vcf",
+        "{aligner}/{caller,sniffles|pbsv}_results/{sample}/{minscore}/{vcf}/fp.vcf",
+        "{aligner}/{caller,sniffles|pbsv}_results/{sample}/{minscore}/{vcf}/giab_report.txt",
+        temp("{aligner}/{caller,sniffles|pbsv}_results/{sample}/{minscore}/{vcf}/log.txt"),
+        "{aligner}/{caller,sniffles|pbsv}_results/{sample}/{minscore}/{vcf}/summary.txt",
+        temp("{aligner}/{caller,sniffles|pbsv}_results/{sample}/{minscore}/{vcf}/tp-base.vcf"),
+        "{aligner}/{caller,sniffles|pbsv}_results/{sample}/{minscore}/{vcf}/tp-call.vcf"
     params:
         out_dir="{aligner}/{caller}_results/{sample}/{minscore}/{vcf}"
     threads: 1
@@ -85,7 +101,7 @@ rule reformat_truvari_results:
     input:
         "{aligner}/{caller}_results/{sample}/{minscore}/{vcf}/summary.txt"
     output:
-        "{aligner}/{caller,sniffles|pbsv}_results/{sample}/{minscore}/pr_rec.{vcf}.txt"
+        temp("{aligner}/{caller,sniffles|pbsv}_results/{sample}/{minscore}/pr_rec.{vcf}.txt")
     threads: 1
     shell:
         "cat {input} | grep 'precision\|recall' | tr -d ',' |sed 's/^[ \t]*//' | tr -d '\"' | tr -d ' ' | tr ':' '\t' | awk 'OFS=\"\\t\" {{ print \"{wildcards.caller}\", \"{wildcards.sample}\", {wildcards.minscore}, $1, $2 }}' > {output}"
@@ -94,7 +110,7 @@ rule reformat_truvari_results_svim:
     input:
         "{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}.gt/summary.txt"
     output:
-        "{aligner}/svim_results/{sample}/{parameters}/{minscore}/pr_rec.{vcf}.txt"
+        temp("{aligner}/svim_results/{sample}/{parameters}/{minscore}/pr_rec.{vcf}.txt")
     threads: 1
     shell:
         "cat {input} | grep 'precision\|recall' | tr -d ',' |sed 's/^[ \t]*//' | tr -d '\"' | tr -d ' ' | tr ':' '\t' | awk 'OFS=\"\\t\" {{ print \"svim\", \"{wildcards.sample}\", {wildcards.minscore}, $1, $2 }}' > {output}"
