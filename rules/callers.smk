@@ -13,19 +13,20 @@ CHROMOSOMES = get_chromosomes(config["genome"])
 
 rule svim_call:
     input:
-        "{aligner}/alignment_pooled/{sample}.bam"
+        genome = config["genome"],
+        bam="{aligner}/alignment_pooled/{sample}.bam"
     output:
         "{aligner}/svim_calls/{sample}/{run_name}_{max_distance}/final_results.vcf"
     params:
         working_dir = "{aligner}/svim_calls/{sample}/{run_name}_{max_distance}/",
-        #max_distance = config["parameters"]["svim_cluster_max_distance"],
         min_sv_size = config["parameters"]["min_sv_size"]
     threads: 1
     log:
         "logs/{aligner}/svim_call/{sample}/{run_name}_{max_distance}.log"
     shell:
         "svim alignment --sample {wildcards.sample} --cluster_max_distance {wildcards.max_distance} \
-         --min_sv_size {params.min_sv_size} {params.working_dir} {input} 2> {log}"
+         --min_sv_size {params.min_sv_size} --segment_gap_tolerance 20 --segment_overlap_tolerance 20 \
+         --duplications_as_insertions {params.working_dir} {input.bam} {input.genome} 2> {log}"
 
 rule filter_svim:
     input:
