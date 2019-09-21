@@ -56,7 +56,7 @@ rule callset_eval_svim:
         "{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}/giab_report.txt",
         temp("{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}/log.txt"),
         "{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}/summary.txt",
-        temp("{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}/tp-base.vcf"),
+        "{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}/tp-base.vcf",
         "{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}/tp-call.vcf"
     params:
         out_dir="{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}"
@@ -64,7 +64,7 @@ rule callset_eval_svim:
     log:
         "logs/{aligner}/truvari/pooled.svim.{sample}.{parameters}.{minscore}.{vcf}.log"
     shell:
-        "rm -rf {params.out_dir} && /project/pacbiosv/bin/truvari/truvari.py -f {input.genome}\
+        "rm -rf {params.out_dir} && truvari -f {input.genome}\
                     -b {input.truth_vcf} -c {input.calls} -o {params.out_dir}\
                     --passonly --includebed {input.truth_bed} --giabreport -r 1000 -p 0.00 2> {log}"
 
@@ -84,7 +84,7 @@ rule callset_eval_svim_gtcomp:
         "{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}.gt/giab_report.txt",
         temp("{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}.gt/log.txt"),
         "{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}.gt/summary.txt",
-        temp("{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}.gt/tp-base.vcf"),
+        "{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}.gt/tp-base.vcf",
         "{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}.gt/tp-call.vcf"
     params:
         out_dir="{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}.gt"
@@ -92,7 +92,7 @@ rule callset_eval_svim_gtcomp:
     log:
         "logs/{aligner}/truvari/pooled.svim.{sample}.{parameters}.{minscore}.{vcf}.gt.log"
     shell:
-        "rm -rf {params.out_dir} && /project/pacbiosv/bin/truvari/truvari.py -f {input.genome}\
+        "rm -rf {params.out_dir} && truvari -f {input.genome}\
                     -b {input.truth_vcf} -c {input.calls} -o {params.out_dir}\
                     --passonly --gtcomp --includebed {input.truth_bed} --giabreport -r 1000 -p 0.00 2> {log}"
 
@@ -112,7 +112,7 @@ rule callset_eval:
         "{aligner}/{caller,sniffles|pbsv}_results/{sample}/{minscore}/{vcf}/giab_report.txt",
         temp("{aligner}/{caller,sniffles|pbsv}_results/{sample}/{minscore}/{vcf}/log.txt"),
         "{aligner}/{caller,sniffles|pbsv}_results/{sample}/{minscore}/{vcf}/summary.txt",
-        temp("{aligner}/{caller,sniffles|pbsv}_results/{sample}/{minscore}/{vcf}/tp-base.vcf"),
+        "{aligner}/{caller,sniffles|pbsv}_results/{sample}/{minscore}/{vcf}/tp-base.vcf",
         "{aligner}/{caller,sniffles|pbsv}_results/{sample}/{minscore}/{vcf}/tp-call.vcf"
     params:
         out_dir="{aligner}/{caller}_results/{sample}/{minscore}/{vcf}"
@@ -120,7 +120,7 @@ rule callset_eval:
     log:
         "logs/{aligner}/truvari/pooled.{caller}.{sample}.{minscore}.{vcf}.log"
     shell:
-        "rm -rf {params.out_dir} && /project/pacbiosv/bin/truvari/truvari.py -f {input.genome}\
+        "rm -rf {params.out_dir} && truvari -f {input.genome}\
                     -b {input.truth_vcf} -c {input.calls} -o {params.out_dir}\
                     --passonly --includebed {input.truth_bed} --giabreport -r 1000 -p 0.00 2> {log}"
 
@@ -140,7 +140,7 @@ rule callset_eval_gtcomp:
         "{aligner}/{caller,sniffles|pbsv}_results/{sample}/{minscore}/{vcf}.gt/giab_report.txt",
         temp("{aligner}/{caller,sniffles|pbsv}_results/{sample}/{minscore}/{vcf}.gt/log.txt"),
         "{aligner}/{caller,sniffles|pbsv}_results/{sample}/{minscore}/{vcf}.gt/summary.txt",
-        temp("{aligner}/{caller,sniffles|pbsv}_results/{sample}/{minscore}/{vcf}.gt/tp-base.vcf"),
+        "{aligner}/{caller,sniffles|pbsv}_results/{sample}/{minscore}/{vcf}.gt/tp-base.vcf",
         "{aligner}/{caller,sniffles|pbsv}_results/{sample}/{minscore}/{vcf}.gt/tp-call.vcf"
     params:
         out_dir="{aligner}/{caller}_results/{sample}/{minscore}/{vcf}.gt"
@@ -148,7 +148,7 @@ rule callset_eval_gtcomp:
     log:
         "logs/{aligner}/truvari/pooled.{caller}.{sample}.{minscore}.{vcf}.gt.log"
     shell:
-        "rm -rf {params.out_dir} && /project/pacbiosv/bin/truvari/truvari.py -f {input.genome}\
+        "rm -rf {params.out_dir} && truvari -f {input.genome}\
                     -b {input.truth_vcf} -c {input.calls} -o {params.out_dir}\
                     --passonly --gtcomp --includebed {input.truth_bed} --giabreport -r 1000 -p 0.00 2> {log}"
 
@@ -174,7 +174,7 @@ rule reformat_truvari_results_svim:
 
 rule cat_truvari_results_all:
     input:
-        expand("{{aligner}}/svim_results/{{sample}}/{{parameters}}/{minscore}/pr_rec.{{vcf}}.txt", minscore=range(config["minimums"]["svim_from"], config["minimums"]["svim_to"], config["minimums"]["svim_step"])),
+        expand("{{aligner}}/svim_results/{{sample}}/{{parameters}}/{minscore}/pr_rec.{{vcf}}.txt", minscore=sorted(list(range(config["minimums"]["svim_from"], config["minimums"]["svim_to"], config["minimums"]["svim_step"])) + [2, 4, 6, 8])),
         expand("{{aligner}}/sniffles_results/{{sample}}/{minscore}/pr_rec.{{vcf}}.txt", minscore=range(config["minimums"]["sniffles_from"], config["minimums"]["sniffles_to"], config["minimums"]["sniffles_step"])),
         expand("{{aligner}}/pbsv_results/{{sample}}/{minscore}/pr_rec.{{vcf}}.txt", minscore=range(config["minimums"]["pbsv_from"], config["minimums"]["pbsv_to"], config["minimums"]["pbsv_step"]))
     output:
@@ -185,8 +185,8 @@ rule cat_truvari_results_all:
 
 rule cat_truvari_results_svim_multiple_coverages:
     input:
-        expand("{{aligner}}/svim_results/{{sample}}.subsampled.{fraction}/{{parameters}}/{minscore}/pr_rec.{{vcf}}.txt", fraction=range(10, 91, 10), minscore=range(config["minimums"]["svim_from"], config["minimums"]["svim_to"], config["minimums"]["svim_step"])),
-        expand("{{aligner}}/svim_results/{{sample}}/{{parameters}}/{minscore}/pr_rec.{{vcf}}.txt", minscore=range(config["minimums"]["svim_from"], config["minimums"]["svim_to"], config["minimums"]["svim_step"]))
+        expand("{{aligner}}/svim_results/{{sample}}.subsampled.{fraction}/{{parameters}}/{minscore}/pr_rec.{{vcf}}.txt", fraction=range(10, 91, 10), minscore=sorted(list(range(config["minimums"]["svim_from"], config["minimums"]["svim_to"], config["minimums"]["svim_step"])) + [2, 4, 6, 8])),
+        expand("{{aligner}}/svim_results/{{sample}}/{{parameters}}/{minscore}/pr_rec.{{vcf}}.txt", minscore=sorted(list(range(config["minimums"]["svim_from"], config["minimums"]["svim_to"], config["minimums"]["svim_step"])) + [2, 4, 6, 8]))
     output:
         "{aligner}/eval/{sample}/{parameters}/svim_results_multiple_coverages.{vcf}.txt"
     threads: 1
