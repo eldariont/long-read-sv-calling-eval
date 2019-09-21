@@ -35,7 +35,6 @@ rule pbmm_align:
         fq = get_samples,
         index = config["genome"] + ".mmi"
     output:
-        uncompressed = temp("minimap2_pbsv/uncompressed/{sample}.fq"),
         bam = temp("minimap2_pbsv/alignment/{sample}.bam")
     threads:
         8
@@ -46,10 +45,9 @@ rule pbmm_align:
         "logs/minimap2_pbsv/{sample}.log"
     shell:
         """
-        zcat {input.fq} > {output.uncompressed} && \
         pbmm2 align --preset {params.preset} --alignment-threads {threads} \
         --sort --rg '@RG\tID:rg1a\tSM:{params.sample}' --sample HG2 \
-        {input.index} {output.uncompressed} {output.bam}  2> {log}
+        {input.index} {input.fq} {output.bam}  2> {log}
         """
 
 rule ngmlr_align:
