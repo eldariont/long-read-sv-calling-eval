@@ -79,7 +79,7 @@ rule pbsv:
     shell:
         """
         pbsv discover {input.bam} {output.svsig} && \
-        pbsv call -A 1 -O 1 -S 0 -t INS,DEL --min-sv-length {params.min_sv_size} \
+        pbsv call -t INS,DEL --min-sv-length {params.min_sv_size} \
         --call-min-read-perc-one-sample {wildcards.minpercent} {input.genome} {output.svsig} {output.vcf}
         """
 
