@@ -2,6 +2,7 @@
 config.yaml
 minimap2/*
 minimap2_pbsv/*
+ngmlr/*
 fastq/*
 logs/*
 reference/*

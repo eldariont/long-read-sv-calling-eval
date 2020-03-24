@@ -1,6 +1,7 @@
 import os
 import gzip
 import sys
+import shutil
 
 include: "rules/mosdepth.smk"
 include: "rules/plots.smk"
@@ -41,23 +42,24 @@ rule minimap2:
         expand("minimap2/eval/pooled/{caller}_pr_multiple_coverages.{vcf}.png", caller=["sniffles", "pbsv"], vcf=["vcf", "vcf.gt"]),
         "minimap2/svim_calls/pooled.phased/default_0.3/final_results.vcf"
 
-
 rule ngmlr:
     input:
         #Alignments
         "ngmlr/alignment_stats/alignment_stats.txt",
         "ngmlr/mosdepth/regions.combined.gz",
+        "ngmlr/mosdepth/mean_coverages.txt",
         "ngmlr/mosdepth_global_plot/global.html",
         #SV lengths
-        expand("ngmlr/SV-plots/SV-length_sniffles_{minsupport}_pooled.png",
+        expand("ngmlr/SV-plots/pooled/SV-length_sniffles_{minsupport}.png",
                 minsupport=range(config["minimums"]["sniffles_from"], config["minimums"]["sniffles_to"], config["minimums"]["sniffles_step"])),
-        expand("ngmlr/SV-plots/SV-length_svim_{minscore}_pooled.png",
-                minscore=range(config["minimums"]["svim_from"], config["minimums"]["svim_to"], config["minimums"]["svim_step"])),
-        #"ngmlr/SV-plots/SV-length_nanosv_pooled.png",
+        expand("ngmlr/SV-plots/pooled/SV-length_svim_default_{max_distance}_{minscore}.png",
+                max_distance=[0.3], minscore=range(config["minimums"]["svim_from"], config["minimums"]["svim_to"], config["minimums"]["svim_step"])),
         #Carriers
-        expand("ngmlr/SV-plots/SV-sniffles_{minsupport}_carriers.png",
-               minsupport=range(config["minimums"]["sniffles_from"], config["minimums"]["sniffles_to"], config["minimums"]["sniffles_step"])),
-        #Evaluation
-        "ngmlr/eval/pooled/tools_pr_svim_sniffles.png",
-        expand("ngmlr/eval/pooled.subsampled.{fraction}/tools_pr_svim_sniffles.png", fraction=range(10, 91, 10)),
-        expand("ngmlr/eval/pooled/{caller}_pr_multiple_coverages.png", caller=["sniffles", "svim"])
+        expand("ngmlr/SV-plots/pooled/SV-sniffles_{minsupport}_carriers.png",
+                minsupport=range(config["minimums"]["sniffles_from"], config["minimums"]["sniffles_to"], config["minimums"]["sniffles_step"])),
+        #Evaluation - Tool comparison
+        expand("ngmlr/eval/pooled/{run_name}_{max_distance}/tools_pr_all.{vcf}.png", run_name=["default"], max_distance=[0.3], vcf=["vcf", "vcf_het", "vcf.gt"]),
+        #expand("ngmlr/eval/pooled.subsampled.{fraction}/{run_name}_{max_distance}/tools_pr_all.{vcf}.png", run_name=["default"], max_distance=[0.3], fraction=range(10, 91, 10), vcf=["vcf", "vcf_het", "vcf.gt"]),
+        #Evaluation - Coverage comparison
+        #expand("ngmlr/eval/pooled/{run_name}_{max_distance}/svim_pr_multiple_coverages.{vcf}.png", run_name=["default"], max_distance=[0.3], vcf=["vcf", "vcf_het", "vcf.gt"]),
+        #expand("ngmlr/eval/pooled/{caller}_pr_multiple_coverages.{vcf}.png", caller=["sniffles"], vcf=["vcf", "vcf_het", "vcf.gt"])
