@@ -26,7 +26,7 @@ rule svim_call:
     shell:
         "svim alignment --sample {wildcards.sample} --cluster_max_distance {wildcards.max_distance} \
          --min_sv_size {params.min_sv_size} --segment_gap_tolerance 20 --segment_overlap_tolerance 20 \
-         --duplications_as_insertions {params.working_dir} {input.bam} {input.genome} 2> {log}"
+         --duplications_as_insertions --read_names {params.working_dir} {input.bam} {input.genome} 2> {log}"
 
 rule filter_svim:
     input:

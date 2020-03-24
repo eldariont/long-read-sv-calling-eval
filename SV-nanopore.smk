@@ -38,8 +38,8 @@ rule minimap2:
         expand("minimap2/eval/pooled.subsampled.{fraction}/{run_name}_{max_distance}/tools_pr_all.{vcf}.png", run_name=["default"], max_distance=[0.3], fraction=range(10, 91, 10), vcf=["vcf", "vcf.gt"]),
         #Evaluation - Coverage comparison
         expand("minimap2/eval/pooled/{run_name}_{max_distance}/svim_pr_multiple_coverages.{vcf}.png", run_name=["default"], max_distance=[0.3], vcf=["vcf", "vcf.gt"]),
-        expand("minimap2/eval/pooled/{caller}_pr_multiple_coverages.{vcf}.png", caller=["sniffles", "pbsv"], vcf=["vcf", "vcf.gt"])
-
+        expand("minimap2/eval/pooled/{caller}_pr_multiple_coverages.{vcf}.png", caller=["sniffles", "pbsv"], vcf=["vcf", "vcf.gt"]),
+        "minimap2/svim_calls/pooled.phased/default_0.3/final_results.vcf"
 
 
 rule ngmlr:
