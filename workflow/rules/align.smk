@@ -1,114 +1,120 @@
+localrules: pbmm_index, index_alignment, alignment_stats, pool_samples, subsample_alignments
+
 def get_samples(wildcards):
     return config["samples"][wildcards.sample]
 
 
-rule minimap2_align:
+rule run_alignments_minimap2:
     input:
         fq = get_samples,
-        genome = config["genome"]
+        genome = config["reference"]
     output:
-        temp("minimap2/alignment/{sample}.bam")
+        temp("pipeline/alignments/{sample}.minimap2.bam")
     params:
-        preset = config["parameters"]["minimap_preset"]
-    threads:
-        8
-    log:
-        "logs/minimap2/{sample}.log"
+        preset = config["parameters"]["minimap_preset"],
+        runtime = "1500",
+        memory = "50000"
+    threads: 10
+    conda:
+        "../envs/minimap2.yaml"
     shell:
-        "minimap2 --MD -ax {params.preset} -t {threads} {input.genome} {input.fq} | \
-         samtools sort -@ {threads} -o {output} - 2> {log}"
+        "minimap2 -ax {params.preset} -t {threads} --MD -Y {input.genome} {input.fq} | \
+         samtools sort -@ {threads} -o {output} -"
 
 rule pbmm_index:
     input:
-        genome = config["genome"]
+        genome = config["reference"]
     output:
-        index = config["genome"] + ".mmi"
+        index = config["reference"] + ".mmi"
     params:
         preset = config["parameters"]["pbmm_preset"]
     threads: 2
+    conda:
+        "../envs/pbmm2.yaml"
     shell:
         "pbmm2 index --num-threads {threads} --preset {params.preset} \
         {input.genome} {output.index}"
 
-rule pbmm_align:
+rule run_alignments_pbmm2:
     input:
         fq = get_samples,
-        index = config["genome"] + ".mmi"
+        index = config["reference"] + ".mmi"
     output:
-        bam = temp("minimap2_pbsv/alignment/{sample}.bam")
-    threads:
-        8
+        bam = temp("pipeline/alignments/{sample}.pbmm2.bam")
+    threads: 10
     params:
         sample = "{sample}",
-        preset = config["parameters"]["pbmm_preset"]
-    log:
-        "logs/minimap2_pbsv/{sample}.log"
+        preset = config["parameters"]["pbmm_preset"],
+        runtime = "1500",
+        memory = "50000"
+    conda:
+        "../envs/pbmm2.yaml"
     shell:
         """
-        pbmm2 align --preset {params.preset} --alignment-threads {threads} \
+        pbmm2 align --preset {params.preset} -j {threads} \
         --sort --rg '@RG\tID:rg1a\tSM:{params.sample}' --sample HG2 \
-        {input.index} {input.fq} {output.bam}  2> {log}
+        {input.index} {input.fq} {output.bam}
         """
 
-rule ngmlr_align:
+rule run_alignments_ngmlr:
     input:
         fq = get_samples,
-        genome = config["genome"]
+        genome = config["reference"]
     output:
-        temp("ngmlr/alignment/{sample}.bam")
+        temp("pipeline/alignments/{sample}.ngmlr.bam")
     params:
-        preset = config["parameters"]["ngmlr_preset"]
-    threads:
-        36
-    log:
-        "logs/ngmlr/{sample}.log"
+        preset = config["parameters"]["ngmlr_preset"],
+        runtime = "1500",
+        memory = "50000"
+    threads: 10
+    conda:
+        "../envs/ngmlr.yaml"
     shell:
         "zcat {input.fq} | \
          ngmlr --presets {params.preset} -t {threads} -r {input.genome} | \
-         samtools sort -@ {threads} -o {output} - 2> {log}"
+         samtools sort -@ {threads} -o {output} -"
 
-rule samtools_index:
+rule index_alignment:
     input:
-        "{aligner}/{subdir}/{sample}.bam"
+        "{name}.bam"
     output:
-        "{aligner}/{subdir}/{sample}.bam.bai"
-    threads: 4
-    log:
-        "logs/{aligner}/samtools_index/{subdir}.{sample}.log"
+        "{name}.bam.bai"
+    threads: 1
+    conda:
+        "../envs/samtools.yaml"
     shell:
-        "samtools index -@ {threads} {input} 2> {log}"
+        "samtools index {input}"
 
 rule alignment_stats:
     input:
-        bam = expand("{{aligner}}/alignment/{sample}.bam", sample=config["samples"]),
-        bai = expand("{{aligner}}/alignment/{sample}.bam.bai", sample=config["samples"])
+        bam = expand("pipeline/alignments/{sample}.{{aligner}}.bam", sample=config["samples"]),
+        bai = expand("pipeline/alignments/{sample}.{{aligner}}.bam.bai", sample=config["samples"])
     output:
-        "{aligner}/alignment_stats/alignment_stats.txt"
+        "pipeline/alignment_stats/alignment_stats.{aligner}.txt"
     log:
-        "logs/{aligner}/alignment_stats/alignment_stats.log"
+        "pipeline/logs/alignment_stats/alignment_stats.{aligner}.log"
     shell:
-        "python3 " + os.path.join(workflow.basedir, "scripts/alignment_stats.py") + \
-            " -o {output} {input.bam} 2> {log}"
+        "python3 workflow/scripts/alignment_stats.py -o {output} {input.bam} 2> {log}"
 
 rule pool_samples:
     input:
-        expand("{{aligner}}/alignment/{sample}.bam", sample=config["samples"])
+        expand("pipeline/alignments/{sample}.{{aligner}}.bam", sample=config["samples"])
     output:
-        "{aligner}/alignment_pooled/pooled.bam"
-    log:
-        "logs/{aligner}/pool_samples.log"
+        "pipeline/alignment_pooled/pooled.{aligner}.bam"
+    conda:
+        "../envs/samtools.yaml"
     shell:
         "samtools merge -r {output} {input}"
 
 rule subsample_alignments:
     input:
-        "{aligner}/alignment_pooled/pooled.bam"
+        "pipeline/alignment_pooled/pooled.{aligner}.bam"
     output:
-        "{aligner}/alignment_pooled/pooled.subsampled.{fraction}.bam"
+        "pipeline/alignment_pooled/pooled.subsampled.{fraction,[0-9]+}.{aligner}.bam"
     threads: 4
     params:
         additional_threads = 3
-    log:
-        "logs/{aligner}/samtools_view/subsample.{fraction}.log"
+    conda:
+        "../envs/samtools.yaml"
     shell:
         "samtools view -s 10.{wildcards.fraction} -@ {params.additional_threads} -b {input} -o {output}"
