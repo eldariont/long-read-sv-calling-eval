@@ -40,12 +40,12 @@ rule run_sniffles:
     params:
         min_sv_size = config["parameters"]["min_sv_size"],
         runtime = "600",
-        memory = "10000"
+        memory = "20000"
     threads: 3    
     conda:
         "../envs/sniffles.yaml"
     shell:
-        "sniffles --mapped_reads {input.bam} --min_length {params.min_sv_size} --min_support {wildcards.minsupport} --vcf {output} --threads {threads} --genotype > {log}"
+        "sniffles --mapped_reads {input.bam} --min_length {params.min_sv_size} --min_support {wildcards.minsupport} --vcf {output} --threads {threads} --genotype"
 
 #see https://github.com/spiralgenetics/truvari/issues/43
 rule fix_sniffles:
@@ -57,7 +57,7 @@ rule fix_sniffles:
         "sed 's/##INFO=<ID=SUPTYPE,Number=A/##INFO=<ID=SUPTYPE,Number=./' {input} > {output}"
 
 #PBSV
-rule pbsv:
+rule run_pbsv:
     input:
         bam = "pipeline/alignment_pooled/{data}.pbmm2.bam",
         bai = "pipeline/alignment_pooled/{data}.pbmm2.bam.bai",
@@ -68,7 +68,7 @@ rule pbsv:
     params:
         min_sv_size = config["parameters"]["min_sv_size"],
         runtime = "600",
-        memory = "10000"
+        memory = "20000"
     threads: 2
     conda:
         "../envs/pbsv.yaml"

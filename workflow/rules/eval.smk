@@ -1,4 +1,4 @@
-localrules: bgzip, tabix, reformat_truvari_results, reformat_truvari_results_svim, cat_truvari_results
+localrules: bgzip, tabix, callset_eval_svim, callset_eval, reformat_truvari_results, reformat_truvari_results_svim, cat_truvari_results
 
 def get_vcf(wildcards):
     return config["truth"][wildcards.vcf]
@@ -34,7 +34,7 @@ rule callset_eval_svim:
         out_dir="pipeline/SVIM_results/{aligner}/{data}/{parameters}/{minscore}/{vcf}"
     threads: 1
     log:
-        "logs/truvari/truvari.svim.{data}.{aligner}.{parameters}.{minscore}.{vcf}.log"
+        log="logs/truvari/truvari.svim.{data}.{aligner}.{parameters}.{minscore}.{vcf}.log"
     conda:
         "../envs/truvari.yaml"
     script:
@@ -82,7 +82,7 @@ rule callset_eval:
         out_dir="pipeline/{caller}_results/{aligner}/{data}/{minscore}/{vcf}"
     threads: 1
     log:
-        "logs/truvari/truvari.{caller}.{data}.{aligner}.{minscore}.{vcf}.log"
+        log="logs/truvari/truvari.{caller}.{data}.{aligner}.{minscore}.{vcf}.log"
     conda:
         "../envs/truvari.yaml"
     script:
