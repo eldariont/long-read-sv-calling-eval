@@ -12,13 +12,14 @@ rule run_alignments_minimap2:
         temp("pipeline/alignments/{sample}.minimap2.bam")
     params:
         preset = config["parameters"]["minimap_preset"],
+        options = config["parameters"]["minimap_options"],
         runtime = "1500",
         memory = "50000"
     threads: 10
     conda:
         "../envs/minimap2.yaml"
     shell:
-        "minimap2 -ax {params.preset} -t {threads} --MD -Y {input.genome} {input.fq} | \
+        "minimap2 -ax {params.preset} {params.options} -t {threads} --MD -Y {input.genome} {input.fq} | \
          samtools sort -@ {threads} -o {output} -"
 
 rule pbmm_index:
