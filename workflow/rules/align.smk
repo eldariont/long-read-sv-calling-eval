@@ -10,11 +10,13 @@ rule run_alignments_minimap2:
         genome = config["reference"]
     output:
         temp("pipeline/alignments/{sample}.minimap2.bam")
+    resources:
+        mem_mb = 50000,
+        time_min = 1500,
+        io_gb = 100
     params:
         preset = config["parameters"]["minimap_preset"],
-        options = config["parameters"]["minimap_options"],
-        runtime = "1500",
-        memory = "50000"
+        options = config["parameters"]["minimap_options"]
     threads: 10
     conda:
         "../envs/minimap2.yaml"
@@ -29,6 +31,8 @@ rule pbmm_index:
         index = config["reference"] + ".mmi"
     params:
         preset = config["parameters"]["pbmm_preset"]
+    resources:
+        io_gb = 100
     threads: 2
     conda:
         "../envs/pbmm2.yaml"
@@ -43,11 +47,13 @@ rule run_alignments_pbmm2:
     output:
         bam = temp("pipeline/alignments/{sample}.pbmm2.bam")
     threads: 10
+    resources:
+        mem_mb = 50000,
+        time_min = 1500,
+        io_gb = 100
     params:
         sample = "{sample}",
-        preset = config["parameters"]["pbmm_preset"],
-        runtime = "1500",
-        memory = "50000"
+        preset = config["parameters"]["pbmm_preset"]
     conda:
         "../envs/pbmm2.yaml"
     shell:
@@ -63,10 +69,12 @@ rule run_alignments_ngmlr:
         genome = config["reference"]
     output:
         temp("pipeline/alignments/{sample}.ngmlr.bam")
+    resources:
+        mem_mb = 50000,
+        time_min = 1500,
+        io_gb = 100
     params:
-        preset = config["parameters"]["ngmlr_preset"],
-        runtime = "1500",
-        memory = "50000"
+        preset = config["parameters"]["ngmlr_preset"]
     threads: 10
     conda:
         "../envs/ngmlr.yaml"
@@ -81,6 +89,8 @@ rule index_alignment:
     output:
         "{name}.bam.bai"
     threads: 1
+    resources:
+        io_gb = 100
     conda:
         "../envs/samtools.yaml"
     shell:
@@ -92,6 +102,8 @@ rule alignment_stats:
         bai = expand("pipeline/alignments/{sample}.{{aligner}}.bam.bai", sample=config["samples"])
     output:
         "pipeline/alignment_stats/alignment_stats.{aligner}.txt"
+    resources:
+        io_gb = 100
     log:
         "pipeline/logs/alignment_stats/alignment_stats.{aligner}.log"
     shell:
@@ -102,6 +114,8 @@ rule pool_samples:
         expand("pipeline/alignments/{sample}.{{aligner}}.bam", sample=config["samples"])
     output:
         "pipeline/alignment_pooled/pooled.{aligner}.bam"
+    resources:
+        io_gb = 100
     conda:
         "../envs/samtools.yaml"
     shell:
@@ -113,6 +127,8 @@ rule subsample_alignments:
     output:
         "pipeline/alignment_pooled/pooled.subsampled.{fraction,[0-9]+}.{aligner}.bam"
     threads: 4
+    resources:
+        io_gb = 100
     params:
         additional_threads = 3
     conda:

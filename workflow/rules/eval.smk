@@ -138,9 +138,17 @@ rule reformat_truvari_results_svim:
 
 rule cat_truvari_results:
     input:
-        svim = expand("pipeline/SVIM_results/{{aligner}}/{data}/0.3/{minscore}/{vcf}/pr_rec.txt", data = SUBSAMPLES, minscore=[0] + list(range(1, 60, 2)), vcf=VCFS),
-        sniffles = expand("pipeline/Sniffles_results/{{aligner}}/{data}/{minscore}/{vcf}/pr_rec.txt", data = SUBSAMPLES, minscore=list(range(1, 60, 2)), vcf=VCFS),
-        pbsv = expand("pipeline/pbsv_results/{{aligner}}/{data}/{minscore}/{vcf}/pr_rec.txt", data = SUBSAMPLES, minscore=list(range(1, 60, 2)), vcf=VCFS)
+        svim = expand("pipeline/SVIM_results/{{aligner}}/{data}/0.3/{minscore}/{vcf}/pr_rec.txt", 
+                          data = SUBSAMPLES, 
+                          minscore=[0] + list(range(1, 60, 2)), vcf=VCFS),
+        sniffles = expand("pipeline/Sniffles_results/{{aligner}}/{data}/{minscore}/{vcf}/pr_rec.txt", 
+                          data = SUBSAMPLES, 
+                          minscore=list(range(config["minimums"]["sniffles_from"], config["minimums"]["sniffles_to"]+1, config["minimums"]["sniffles_step"])),
+                          vcf=VCFS),
+        pbsv = expand("pipeline/pbsv_results/{{aligner}}/{data}/{minscore}/{vcf}/pr_rec.txt", 
+                          data = SUBSAMPLES, 
+                          minscore=list(range(config["minimums"]["pbsv_from"], config["minimums"]["pbsv_to"]+1, config["minimums"]["pbsv_step"])), 
+                          vcf=VCFS)
     output:
         svim = temp("pipeline/eval/{aligner}/svim.results.txt"),
         sniffles = temp("pipeline/eval/{aligner}/sniffles.results.txt"),

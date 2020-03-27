@@ -8,11 +8,13 @@ rule run_svim:
         bai="pipeline/alignment_pooled/{data}.{aligner}.bam.bai"
     output:
         "pipeline/SVIM/{aligner}/{data}/{max_distance}/variants.vcf"
+    resources:
+        mem_mb = 10000,
+        time_min = 600,
+        io_gb = 100
     params:
         working_dir = "pipeline/SVIM/{aligner}/{data}/{max_distance}/",
-        min_sv_size = config["parameters"]["min_sv_size"],
-        runtime = "600",
-        memory = "10000"
+        min_sv_size = config["parameters"]["min_sv_size"]
     threads: 1
     shell:
         "/home/heller_d/bin/anaconda3/bin/svim alignment --sample {wildcards.data} --cluster_max_distance {wildcards.max_distance} \
@@ -36,16 +38,24 @@ rule run_sniffles:
         bam = "pipeline/alignment_pooled/{data}.{aligner}.bam",
         bai = "pipeline/alignment_pooled/{data}.{aligner}.bam.bai"
     output:
-        temp("pipeline/Sniffles/{aligner}/{data}/raw_{minsupport,[0-9]+}.vcf")
+        expand("pipeline/Sniffles/{{aligner}}/{{data}}/raw_{minsupport}.vcf", 
+                minsupport=list(range(config["minimums"]["sniffles_from"], config["minimums"]["sniffles_to"]+1, config["minimums"]["sniffles_step"])))
+    resources:
+        mem_mb = 400000,
+        time_min = 600,
+        io_gb = 100
     params:
         min_sv_size = config["parameters"]["min_sv_size"],
-        runtime = "600",
-        memory = "20000"
-    threads: 3    
+        tmpdir = "200",
+        sniffles_from = config["minimums"]["sniffles_from"],
+        sniffles_to = config["minimums"]["sniffles_to"],
+        sniffles_step = config["minimums"]["sniffles_step"],
+        outdir = "pipeline/Sniffles/{aligner}/{data}/"
+    threads: 60
     conda:
         "../envs/sniffles.yaml"
     shell:
-        "sniffles --mapped_reads {input.bam} --min_length {params.min_sv_size} --min_support {wildcards.minsupport} --vcf {output} --threads {threads} --genotype"
+        "bash workflow/scripts/run_sniffles.sh {input.bam} {input.bai} {params.sniffles_from} {params.sniffles_to} {params.sniffles_step} {params.min_sv_size} {threads} {params.outdir}"
 
 #see https://github.com/spiralgenetics/truvari/issues/43
 rule fix_sniffles:
@@ -63,28 +73,24 @@ rule run_pbsv:
         bai = "pipeline/alignment_pooled/{data}.pbmm2.bam.bai",
         genome = config["reference"],
     output:
-        vcf = "pipeline/pbsv/{aligner}/{data}/min_{minsupport,[0-9]+}.vcf",
-        svsig = temp("pipeline/pbsv/{aligner}/{data}/min_{minsupport}.svsig.gz")
+        expand("pipeline/pbsv/{{aligner}}/{{data}}/min_{minsupport}.vcf",
+                minsupport=list(range(config["minimums"]["pbsv_from"], config["minimums"]["pbsv_to"]+1, config["minimums"]["pbsv_step"])))
+    resources:
+        mem_mb = 400000,
+        time_min = 600,
+        io_gb = 100
     params:
         min_sv_size = config["parameters"]["min_sv_size"],
-        runtime = "600",
-        memory = "20000"
-    threads: 2
+        tmpdir = "200",
+        pbsv_from = config["minimums"]["pbsv_from"],
+        pbsv_to = config["minimums"]["pbsv_to"],
+        pbsv_step = config["minimums"]["pbsv_step"],
+        outdir = "pipeline/pbsv/{aligner}/{data}/"
+    threads: 15
     conda:
         "../envs/pbsv.yaml"
     shell:
-        """
-        pbsv discover {input.bam} {output.svsig} && \
-        pbsv call -t INS,DEL \
-        -j {threads} \
-        --min-sv-length {params.min_sv_size} \
-        --max-ins-length 100K \
-        --call-min-reads-one-sample {wildcards.minsupport} \
-        --call-min-reads-all-samples {wildcards.minsupport} \
-        --call-min-reads-per-strand-all-samples 0 \
-        --call-min-bnd-reads-all-samples 0 \
-        --call-min-read-perc-one-sample 0 {input.genome} {output.svsig} {output.vcf}
-        """
+        "bash workflow/scripts/run_pbsv.sh {input.bam} {input.bai} {input.genome} {params.pbsv_from} {params.pbsv_to} {params.pbsv_step} {params.min_sv_size} {threads} {params.outdir}"
 
 #Split to SV classes
 rule filter_insertions_and_deletions:
