@@ -42,7 +42,7 @@ rule run_sniffles:
                 minsupport=list(range(config["minimums"]["sniffles_from"], config["minimums"]["sniffles_to"]+1, config["minimums"]["sniffles_step"])))
     resources:
         mem_mb = 400000,
-        time_min = 600,
+        time_min = 1200,
         io_gb = 100
     params:
         min_sv_size = config["parameters"]["min_sv_size"],
@@ -77,7 +77,7 @@ rule run_pbsv:
                 minsupport=list(range(config["minimums"]["pbsv_from"], config["minimums"]["pbsv_to"]+1, config["minimums"]["pbsv_step"])))
     resources:
         mem_mb = 400000,
-        time_min = 600,
+        time_min = 1200,
         io_gb = 100
     params:
         min_sv_size = config["parameters"]["min_sv_size"],
