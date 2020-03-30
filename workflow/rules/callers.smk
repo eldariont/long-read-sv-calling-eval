@@ -46,7 +46,7 @@ rule run_sniffles:
         io_gb = 100
     params:
         min_sv_size = config["parameters"]["min_sv_size"],
-        tmpdir = "200",
+        tmpdir = "300",
         sniffles_from = config["minimums"]["sniffles_from"],
         sniffles_to = config["minimums"]["sniffles_to"],
         sniffles_step = config["minimums"]["sniffles_step"],
@@ -81,7 +81,7 @@ rule run_pbsv:
         io_gb = 100
     params:
         min_sv_size = config["parameters"]["min_sv_size"],
-        tmpdir = "200",
+        tmpdir = "300",
         pbsv_from = config["minimums"]["pbsv_from"],
         pbsv_to = config["minimums"]["pbsv_to"],
         pbsv_step = config["minimums"]["pbsv_step"],
