@@ -51,7 +51,7 @@ rule run_sniffles:
         sniffles_to = config["minimums"]["sniffles_to"],
         sniffles_step = config["minimums"]["sniffles_step"],
         outdir = "pipeline/Sniffles/{aligner}/{data}/"
-    threads: 60
+    threads: 30
     conda:
         "../envs/sniffles.yaml"
     shell:
