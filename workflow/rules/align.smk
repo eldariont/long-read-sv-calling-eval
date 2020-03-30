@@ -123,15 +123,18 @@ rule pool_samples:
 
 rule subsample_alignments:
     input:
-        "pipeline/alignment_pooled/pooled.{aligner}.bam"
+        bam = "pipeline/alignment_pooled/pooled.{aligner}.bam"
     output:
-        "pipeline/alignment_pooled/pooled.subsampled.{fraction,[0-9]+}.{aligner}.bam"
-    threads: 4
+        expand("pipeline/alignment_pooled/pooled.subsampled.{fraction}.{{aligner}}.bam", fraction=range(10, 100, 10))
+    threads: 10
     resources:
+        mem_mb = 400000,
+        time_min = 1000,
         io_gb = 100
     params:
-        additional_threads = 3
+        tmpdir = "1500",
+        outdir = "pipeline/alignment_pooled/"
     conda:
         "../envs/samtools.yaml"
     shell:
-        "samtools view -s 10.{wildcards.fraction} -@ {params.additional_threads} -b {input} -o {output}"
+        "bash workflow/scripts/subsample.sh {input.bam} {threads} {params.outdir}"
