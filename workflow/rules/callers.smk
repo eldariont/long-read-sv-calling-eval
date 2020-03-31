@@ -81,7 +81,7 @@ rule run_pbsv:
         io_gb = 100
     params:
         min_sv_size = config["parameters"]["min_sv_size"],
-        tmpdir = "300",
+        tmpdir = "500",
         pbsv_from = config["minimums"]["pbsv_from"],
         pbsv_to = config["minimums"]["pbsv_to"],
         pbsv_step = config["minimums"]["pbsv_step"],
