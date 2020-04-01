@@ -100,7 +100,7 @@ rule filter_insertions_and_deletions:
         "pipeline/{caller,Sniffles|pbsv}/{aligner}/{data}/min_{minscore,[0-9]+}.indel.vcf"
     threads: 1
     shell:
-        "bcftools sort {input} | bcftools view -i 'SVTYPE=\"DEL\" | SVTYPE=\"INS\"' -Ov > {output}"
+        "bcftools view -i 'SVTYPE=\"DEL\" | SVTYPE=\"INS\"' {input} | bcftools sort > {output}"
 
 rule filter_insertions_and_deletions_svim:
     input:
@@ -109,4 +109,4 @@ rule filter_insertions_and_deletions_svim:
         "pipeline/SVIM/{aligner}/{data}/{max_distance}/min_{minscore,[0-9]+}.indel.vcf"
     threads: 1
     shell:
-        "bcftools sort {input} | bcftools view -i 'SVTYPE=\"DEL\" | SVTYPE=\"INS\"' -Ov > {output}"
+        "bcftools view -i 'SVTYPE=\"DEL\" | SVTYPE=\"INS\"' {input} | bcftools sort > {output}"
