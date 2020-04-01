@@ -77,11 +77,11 @@ rule run_pbsv:
                 minsupport=list(range(config["minimums"]["pbsv_from"], config["minimums"]["pbsv_to"]+1, config["minimums"]["pbsv_step"])))
     resources:
         mem_mb = 400000,
-        time_min = 1200,
+        time_min = 2000,
         io_gb = 100
     params:
         min_sv_size = config["parameters"]["min_sv_size"],
-        tmpdir = "500",
+        tmpdir = "1000",
         pbsv_from = config["minimums"]["pbsv_from"],
         pbsv_to = config["minimums"]["pbsv_to"],
         pbsv_step = config["minimums"]["pbsv_step"],
