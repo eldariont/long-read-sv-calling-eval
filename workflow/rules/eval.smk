@@ -40,34 +40,24 @@ rule callset_eval_svim:
     script:
         "../scripts/run_truvari.py"
 
-
-# rule callset_eval_svim_gtcomp:
-#     input:
-#         genome = config["reference"],
-#         truth_vcf = get_vcf,
-#         truth_bed = config["truth"]["bed"],
-#         calls = "pipeline/SVIM/{aligner}/{data}/{parameters}/min_{minscore}.indel.vcf.gz",
-#         index = "pipeline/SVIM/{aligner}/{data}/{parameters}/min_{minscore}.indel.vcf.gz.tbi"
-#     output:
-#         temp("{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}.gt/base-filter.vcf"),
-#         temp("{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}.gt/call-filter.vcf"),
-#         "{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}.gt/fn.vcf",
-#         "{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}.gt/fp.vcf",
-#         "{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}.gt/giab_report.txt",
-#         temp("{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}.gt/log.txt"),
-#         "{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}.gt/summary.txt",
-#         "{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}.gt/tp-base.vcf",
-#         "{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}.gt/tp-call.vcf"
-#     params:
-#         out_dir="{aligner}/svim_results/{sample}/{parameters}/{minscore}/{vcf}.gt"
-#     threads: 1
-#     log:
-#         "logs/{aligner}/truvari/pooled.svim.{sample}.{parameters}.{minscore}.{vcf}.gt.log"
-#     shell:
-#         "rm -rf {params.out_dir} && truvari -f {input.genome}\
-#                     -b {input.truth_vcf} -c {input.calls} -o {params.out_dir}\
-#                     --passonly --gtcomp --includebed {input.truth_bed} --giabreport -r 1000 -p 0.00 2> {log}"
-
+rule callset_eval_svim_gtcomp:
+    input:
+        genome = config["reference"],
+        truth_vcf = get_vcf,
+        truth_bed = config["truth"]["bed"],
+        calls = "pipeline/SVIM/{aligner}/{data}/{parameters}/min_{minscore}.indel.vcf.gz",
+        index = "pipeline/SVIM/{aligner}/{data}/{parameters}/min_{minscore}.indel.vcf.gz.tbi"
+    output:
+        summary="pipeline/SVIM_results/{aligner}/{data}/{parameters}/{minscore}/{vcf}.gt/summary.txt"
+    params:
+        out_dir="pipeline/SVIM_results/{aligner}/{data}/{parameters}/{minscore}/{vcf}.gt"
+    threads: 1
+    log:
+        log="logs/truvari/truvari.svim.{data}.{aligner}.{parameters}.{minscore}.{vcf}.gt.log"
+    conda:
+        "../envs/truvari.yaml"
+    script:
+        "../scripts/run_truvari_gtcomp.py"
 
 rule callset_eval:
     input:
@@ -88,34 +78,24 @@ rule callset_eval:
     script:
         "../scripts/run_truvari.py"
 
-
-# rule callset_eval_gtcomp:
-#     input:
-#         genome = config["reference"],
-#         truth_vcf = get_vcf,
-#         truth_bed = config["truth"]["bed"],
-#         calls = "pipeline/{caller}/{aligner}/{data}/min_{minscore}.indel.vcf.gz",
-#         index = "pipeline/{caller}/{aligner}/{data}/min_{minscore}.indel.vcf.gz.tbi"
-#     output:
-#         temp("{aligner}/{caller,Sniffles|pbsv}_results/{sample}/{minscore}/{vcf}.gt/base-filter.vcf"),
-#         temp("{aligner}/{caller,Sniffles|pbsv}_results/{sample}/{minscore}/{vcf}.gt/call-filter.vcf"),
-#         "{aligner}/{caller,Sniffles|pbsv}_results/{sample}/{minscore}/{vcf}.gt/fn.vcf",
-#         "{aligner}/{caller,Sniffles|pbsv}_results/{sample}/{minscore}/{vcf}.gt/fp.vcf",
-#         "{aligner}/{caller,Sniffles|pbsv}_results/{sample}/{minscore}/{vcf}.gt/giab_report.txt",
-#         temp("{aligner}/{caller,Sniffles|pbsv}_results/{sample}/{minscore}/{vcf}.gt/log.txt"),
-#         "{aligner}/{caller,Sniffles|pbsv}_results/{sample}/{minscore}/{vcf}.gt/summary.txt",
-#         "{aligner}/{caller,Sniffles|pbsv}_results/{sample}/{minscore}/{vcf}.gt/tp-base.vcf",
-#         "{aligner}/{caller,Sniffles|pbsv}_results/{sample}/{minscore}/{vcf}.gt/tp-call.vcf"
-#     params:
-#         out_dir="{aligner}/{caller}_results/{sample}/{minscore}/{vcf}.gt"
-#     threads: 1
-#     log:
-#         "logs/{aligner}/truvari/pooled.{caller}.{sample}.{minscore}.{vcf}.gt.log"
-#     shell:
-#         "rm -rf {params.out_dir} && truvari -f {input.genome}\
-#                     -b {input.truth_vcf} -c {input.calls} -o {params.out_dir}\
-#                     --passonly --gtcomp --includebed {input.truth_bed} --giabreport -r 1000 -p 0.00 2> {log}"
-
+rule callset_eval_gtcomp:
+    input:
+        genome = config["reference"],
+        truth_vcf = get_vcf,
+        truth_bed = config["truth"]["bed"],
+        calls = "pipeline/{caller}/{aligner}/{data}/min_{minscore}.indel.vcf.gz",
+        index = "pipeline/{caller}/{aligner}/{data}/min_{minscore}.indel.vcf.gz.tbi"
+    output:
+        "pipeline/{caller,Sniffles|pbsv}_results/{aligner}/{data}/{minscore}/{vcf}.gt/summary.txt"
+    params:
+        out_dir="pipeline/{caller}_results/{aligner}/{data}/{minscore}/{vcf}.gt"
+    threads: 1
+    log:
+        log="logs/truvari/truvari.{caller}.{data}.{aligner}.{minscore}.{vcf}.gt.log"
+    conda:
+        "../envs/truvari.yaml"
+    script:
+        "../scripts/run_truvari_gtcomp.py"
 
 rule reformat_truvari_results:
     input:
@@ -161,37 +141,46 @@ rule cat_truvari_results:
         shell("cat {input.pbsv} > {output.pbsv}")
         shell("cat {output.svim} {output.sniffles} {output.pbsv} > {output.all}")
 
-# rule plot_pr_tools:
-#     input:
-#         "{aligner}/eval/{sample}/{parameters}/all_results.{vcf}.txt"
-#     output:
-#         "{aligner}/eval/{sample}/{parameters}/tools_pr_all.{vcf}.png"
-#     threads: 1
-#     log:
-#         "logs/{aligner}/rplot/{sample}.{parameters}.tools.pr.{vcf}.log"
-#     shell:
-#         "Rscript --vanilla scripts/plot-pr-tools.R {input} {output} > {log}"
+rule plot_pr_all_results:
+    input:
+        "pipeline/eval/{aligner}/all_results.txt"
+    output:
+        "pipeline/eval/{aligner}/results.{aligner}.all.png"
+    threads: 1
+    log:
+        "pipeline/logs/rplot.all.{aligner}.log"
+    shell:
+        "Rscript --vanilla workflow/scripts/plot_all_results.R {input} {output} > {log}"
 
-# rule plot_pr_tools_multiple_coverages:
-#     input:
-#         results = "{aligner}/eval/{sample}/{caller}_results_multiple_coverages.{vcf}.txt",
-#         coverages = "{aligner}/mosdepth/mean_coverages.txt"
-#     output:
-#         "{aligner}/eval/{sample}/{caller,sniffles|pbsv}_pr_multiple_coverages.{vcf}.png"
-#     threads: 1
-#     log:
-#         "logs/{aligner}/rplot/{sample}.{caller}.pr.coverages.{vcf}.log"
-#     shell:
-#         "Rscript --vanilla scripts/plot-pr-tools-coverages.R {input.results} {input.coverages} {output} > {log}"
+rule plot_pr_tools:
+    input:
+        "pipeline/eval/{aligner}/all_results.txt"
+    output:
+        "pipeline/eval/{aligner}/results.{aligner}.tools.{vcf}.png"
+    threads: 1
+    log:
+        "pipeline/logs/rplot.tools.{aligner}.{vcf}.log"
+    shell:
+        "Rscript --vanilla workflow/scripts/plot_tools.R {input} {wildcards.vcf} {output} > {log}"
 
-# rule plot_pr_tools_multiple_coverages_svim:
+rule plot_pr_coverages:
+    input:
+        "pipeline/eval/{aligner}/all_results.txt"
+    output:
+        "pipeline/eval/{aligner}/results.{aligner}.coverages.{vcf}.png"
+    threads: 1
+    log:
+        "pipeline/logs/rplot.coverages.{aligner}.{vcf}.log"
+    shell:
+        "Rscript --vanilla workflow/scripts/plot_coverages.R {input} {wildcards.vcf} {output} > {log}"
+
+# rule plot_pr_coverages_bar:
 #     input:
-#         results = "{aligner}/eval/{sample}/{parameters}/svim_results_multiple_coverages.{vcf}.txt",
-#         coverages = "{aligner}/mosdepth/mean_coverages.txt"
+#         "pipeline/eval/{aligner}/all_results.txt"
 #     output:
-#         "{aligner}/eval/{sample}/{parameters}/svim_pr_multiple_coverages.{vcf}.png"
+#         "pipeline/eval/{aligner}/results.{aligner}.coverages.bar.png"
 #     threads: 1
 #     log:
-#         "logs/{aligner}/rplot/{sample}.{parameters}.svim.pr.coverages.{vcf}.log"
+#         "pipeline/logs/rplot.coveragesbar.{aligner}.log"
 #     shell:
-#         "Rscript --vanilla scripts/plot-pr-tools-coverages.R {input.results} {input.coverages} {output} > {log}"
+#         "Rscript --vanilla workflow/scripts/plot_coverages_bar.R {input} {output} > {log}"

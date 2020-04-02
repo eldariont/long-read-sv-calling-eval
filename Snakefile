@@ -7,7 +7,7 @@ configfile: "config/config.yaml"
 
 ALIGNERS=["minimap2"]
 SUBSAMPLES=["pooled"] + [("pooled.subsampled." + str(fraction)) for fraction in range(10, 100, 10)]
-VCFS=["giab"]
+VCFS=["giab", "giab.gt"]
 
 wildcard_constraints:
     aligner="minimap2|ngmlr|pbmm2"
@@ -29,10 +29,9 @@ rule all:
         #"minimap2/mosdepth/mean_coverages.txt",
         #"minimap2/mosdepth_global_plot/global.html",
         #SV lengths
-        "pipeline/SV-plots/minimap2/pooled/SV-length_Sniffles_11.png",
+        #"pipeline/SV-plots/minimap2/pooled/SV-length_Sniffles_11.png",
         #Evaluation
-        expand("pipeline/eval/{aligner}/all_results.txt", aligner=ALIGNERS)
-        #expand("pipeline/eval/{mapper}/results.{mapper}.all.png", mapper=ALIGNERS),
-        #expand("pipeline/eval/{mapper}/results.{mapper}.tools.{zygosity}.png", mapper=ALIGNERS, zygosity=["homozygous", "heterozygous"]),
-        #expand("pipeline/eval/{mapper}/results.{mapper}.coverages.png", mapper=ALIGNERS),
-        #expand("pipeline/eval/{mapper}/results.{mapper}.coverages.bar.png", mapper=ALIGNERS)
+        expand("pipeline/eval/{aligner}/results.{aligner}.all.png", aligner=ALIGNERS),
+        expand("pipeline/eval/{aligner}/results.{aligner}.tools.{vcf}.png", aligner=ALIGNERS, vcf=VCFS),
+        expand("pipeline/eval/{aligner}/results.{aligner}.coverages.{vcf}.png", aligner=ALIGNERS, vcf=VCFS),
+        #expand("pipeline/eval/{aligner}/results.{aligner}.coverages.bar.png", aligner=ALIGNERS)
