@@ -146,7 +146,7 @@ rule subsample_alignments_0:
         time_min = 1000,
         io_gb = 100
     params:
-        tmpdir = "700",
+        tmpdir = "1000",
         outdir = "pipeline/alignment_pooled/"
     conda:
         "../envs/samtools.yaml"
@@ -164,7 +164,7 @@ rule subsample_alignments_1:
         time_min = 1000,
         io_gb = 100
     params:
-        tmpdir = "700",
+        tmpdir = "1000",
         outdir = "pipeline/alignment_pooled/"
     conda:
         "../envs/samtools.yaml"
@@ -182,7 +182,7 @@ rule subsample_alignments_2:
         time_min = 1000,
         io_gb = 100
     params:
-        tmpdir = "700",
+        tmpdir = "1000",
         outdir = "pipeline/alignment_pooled/"
     conda:
         "../envs/samtools.yaml"
