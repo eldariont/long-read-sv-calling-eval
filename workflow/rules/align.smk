@@ -9,7 +9,7 @@ rule run_alignments_minimap2:
         fq = get_samples,
         genome = config["reference"]
     output:
-        temp("pipeline/alignments/{sample}.minimap2.bam")
+        temp("pipeline/alignments/{sample}.minimap2.unsorted.bam")
     resources:
         mem_mb = 50000,
         time_min = 1500,
@@ -21,8 +21,22 @@ rule run_alignments_minimap2:
     conda:
         "../envs/minimap2.yaml"
     shell:
-        "minimap2 -ax {params.preset} {params.options} -t {threads} --MD -Y {input.genome} {input.fq} | \
-         samtools sort -@ {threads} -o {output} -"
+        "minimap2 -ax {params.preset} {params.options} -t {threads} --MD -Y {input.genome} {input.fq} > {output}"
+
+rule sort_minimap2_alignments:
+    input:
+        "pipeline/alignments/{sample}.minimap2.unsorted.bam"
+    output:
+        "pipeline/alignments/{sample}.minimap2.bam"
+    resources:
+        mem_mb = 50000,
+        time_min = 1500,
+        io_gb = 100
+    threads: 10
+    conda:
+        "../envs/samtools.yaml"
+    shell:
+        "samtools sort -@ {threads} -o {output} {input}"
 
 rule pbmm_index:
     input:
@@ -132,7 +146,7 @@ rule subsample_alignments_0:
         time_min = 1000,
         io_gb = 100
     params:
-        tmpdir = "700",
+        tmpdir = "1000",
         outdir = "pipeline/alignment_pooled/"
     conda:
         "../envs/samtools.yaml"
@@ -150,7 +164,7 @@ rule subsample_alignments_1:
         time_min = 1000,
         io_gb = 100
     params:
-        tmpdir = "700",
+        tmpdir = "1000",
         outdir = "pipeline/alignment_pooled/"
     conda:
         "../envs/samtools.yaml"
@@ -168,7 +182,7 @@ rule subsample_alignments_2:
         time_min = 1000,
         io_gb = 100
     params:
-        tmpdir = "700",
+        tmpdir = "1000",
         outdir = "pipeline/alignment_pooled/"
     conda:
         "../envs/samtools.yaml"
