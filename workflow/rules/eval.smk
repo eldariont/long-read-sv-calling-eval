@@ -101,7 +101,7 @@ rule reformat_truvari_results:
     input:
         "pipeline/{caller}_results/{aligner}/{data}/{minscore}/{vcf}/summary.txt"
     output:
-        temp("pipeline/{caller,Sniffles|pbsv}_results/{aligner}/{data}/{minscore}/{vcf}/pr_rec.txt")
+        "pipeline/{caller,Sniffles|pbsv}_results/{aligner}/{data}/{minscore}/{vcf}/pr_rec.txt"
     threads: 1
     shell:
         "cat {input} | grep 'precision\|recall' | tr -d ',' |sed 's/^[ \t]*//' | tr -d '\"' | tr -d ' ' | tr ':' '\t' | awk 'OFS=\"\\t\" {{ print \"{wildcards.caller}\", \"{wildcards.aligner}\", \"{wildcards.data}\", \"{wildcards.vcf}\", {wildcards.minscore}, $1, $2 }}' > {output}"
@@ -110,7 +110,7 @@ rule reformat_truvari_results_svim:
     input:
         "pipeline/SVIM_results/{aligner}/{data}/{parameters}/{minscore}/{vcf}/summary.txt"
     output:
-        temp("pipeline/SVIM_results/{aligner}/{data}/{parameters}/{minscore}/{vcf}/pr_rec.txt")
+        "pipeline/SVIM_results/{aligner}/{data}/{parameters}/{minscore}/{vcf}/pr_rec.txt"
     threads: 1
     shell:
         "cat {input} | grep 'precision\|recall' | tr -d ',' |sed 's/^[ \t]*//' | tr -d '\"' | tr -d ' ' | tr ':' '\t' | awk 'OFS=\"\\t\" {{ print \"SVIM\", \"{wildcards.aligner}\", \"{wildcards.data}\", \"{wildcards.vcf}\", {wildcards.minscore}, $1, $2 }}' > {output}"
