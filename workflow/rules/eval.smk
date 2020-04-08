@@ -1,4 +1,4 @@
-localrules: bgzip, tabix, callset_eval_svim, callset_eval, reformat_truvari_results, reformat_truvari_results_svim, cat_truvari_results
+localrules: bgzip, tabix, callset_eval_svim, callset_eval_svim_gtcomp, callset_eval, callset_eval_gtcomp, reformat_truvari_results, reformat_truvari_results_svim, cat_truvari_results, cat_truvari_results_svim_parameters, plot_pr_all_results, plot_pr_tools, plot_pr_coverages, plot_pr_svim_parameters
 
 def get_vcf(wildcards):
     return config["truth"][wildcards.vcf]
@@ -118,7 +118,7 @@ rule reformat_truvari_results_svim:
 
 rule cat_truvari_results:
     input:
-        svim = expand("pipeline/SVIM_results/{{aligner}}/{data}/0.3/{minscore}/{vcf}/pr_rec.txt", 
+        svim = expand("pipeline/SVIM_results/{{aligner}}/{data}/1000_900_0.3/{minscore}/{vcf}/pr_rec.txt", 
                           data = SUBSAMPLES, 
                           minscore=[0] + list(range(1, 60, 2)), vcf=VCFS),
         sniffles = expand("pipeline/Sniffles_results/{{aligner}}/{data}/{minscore}/{vcf}/pr_rec.txt", 
@@ -140,6 +140,26 @@ rule cat_truvari_results:
         shell("cat {input.sniffles} > {output.sniffles}")
         shell("cat {input.pbsv} > {output.pbsv}")
         shell("cat {output.svim} {output.sniffles} {output.pbsv} > {output.all}")
+
+rule cat_truvari_results_svim_parameters:
+    input:
+        svim = expand("pipeline/SVIM_results/{{aligner}}/{data}/{pmd}_{dn}_{cmd}/{minscore}/{vcf}/pr_rec.txt", 
+                          data = ["pooled", "pooled.subsampled.50"],
+                          pmd = [500, 1000, 5000],
+                          dn = [900],
+                          cmd = [0.2, 0.3, 0.4],
+                          minscore=[0] + list(range(1, 60, 2)),
+                          vcf=VCFS)
+    output:
+        all = "pipeline/eval/{aligner}/svim_parameter_results.txt"
+    threads: 1
+    run:
+        with open(output.all, 'w') as output_file:
+            for f in input.svim:
+                parameters = f.split("/")[4]
+                with open(f, 'r') as input_file:
+                    for line in input_file:
+                        print("%s\t%s" % (parameters, line), file=output_file)
 
 rule plot_pr_all_results:
     input:
@@ -173,6 +193,17 @@ rule plot_pr_coverages:
         "pipeline/logs/rplot.coverages.{aligner}.{vcf}.log"
     shell:
         "Rscript --vanilla workflow/scripts/plot_coverages.R {input} {wildcards.vcf} {output} > {log}"
+
+rule plot_pr_svim_parameters:
+    input:
+        "pipeline/eval/{aligner}/svim_parameter_results.txt"
+    output:
+        "pipeline/eval/{aligner}/results.{aligner}.svim.parameters.png"
+    threads: 1
+    log:
+        "pipeline/logs/rplot.all.{aligner}.log"
+    shell:
+        "Rscript --vanilla workflow/scripts/plot_svim_parameters.R {input} {output} > {log}"
 
 # rule plot_pr_coverages_bar:
 #     input:

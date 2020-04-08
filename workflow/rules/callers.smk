@@ -7,25 +7,34 @@ rule run_svim:
         bam="pipeline/alignment_pooled/{data}.{aligner}.bam",
         bai="pipeline/alignment_pooled/{data}.{aligner}.bam.bai"
     output:
-        "pipeline/SVIM/{aligner}/{data}/{max_distance}/variants.vcf"
+        "pipeline/SVIM/{aligner}/{data}/{pmd}_{dn}_{cmd}/variants.vcf"
     resources:
         mem_mb = 10000,
         time_min = 600,
         io_gb = 100
     params:
-        working_dir = "pipeline/SVIM/{aligner}/{data}/{max_distance}/",
+        working_dir = "pipeline/SVIM/{aligner}/{data}/{pmd}_{dn}_{cmd}/",
         min_sv_size = config["parameters"]["min_sv_size"]
     threads: 1
     shell:
-        "/home/heller_d/bin/anaconda3/bin/svim alignment --sample {wildcards.data} --cluster_max_distance {wildcards.max_distance} \
-         --min_sv_size {params.min_sv_size} --segment_gap_tolerance 20 --segment_overlap_tolerance 20 \
-         --interspersed_duplications_as_insertions --tandem_duplications_as_insertions --read_names {params.working_dir} {input.bam} {input.genome}"
+        "/home/heller_d/bin/anaconda3/bin/svim alignment --sample {wildcards.data} \
+         --partition_max_distance {wildcards.pmd} \
+         --distance_normalizer {wildcards.dn} \
+         --cluster_max_distance {wildcards.cmd} \
+         --min_sv_size {params.min_sv_size} \
+         --segment_gap_tolerance 20 \
+         --segment_overlap_tolerance 20 \
+         --interspersed_duplications_as_insertions \
+         --tandem_duplications_as_insertions \
+         --read_names \
+         --verbose \
+         {params.working_dir} {input.bam} {input.genome}"
 
 rule filter_svim:
     input:
-        "pipeline/SVIM/{aligner}/{data}/{max_distance}/variants.vcf"
+        "pipeline/SVIM/{aligner}/{data}/{parameters}/variants.vcf"
     output:
-        temp("pipeline/SVIM/{aligner}/{data}/{max_distance}/min_{minscore,[0-9]+}.vcf")
+        temp("pipeline/SVIM/{aligner}/{data}/{parameters}/min_{minscore,[0-9]+}.vcf")
     threads: 1
     shell:
         "grep -v \"hom_ref\" {input} | \
@@ -104,9 +113,9 @@ rule filter_insertions_and_deletions:
 
 rule filter_insertions_and_deletions_svim:
     input:
-        "pipeline/SVIM/{aligner}/{data}/{max_distance}/min_{minscore}.vcf"
+        "pipeline/SVIM/{aligner}/{data}/{parameters}/min_{minscore}.vcf"
     output:
-        "pipeline/SVIM/{aligner}/{data}/{max_distance}/min_{minscore,[0-9]+}.indel.vcf"
+        "pipeline/SVIM/{aligner}/{data}/{parameters}/min_{minscore,[0-9]+}.indel.vcf"
     threads: 1
     shell:
         "bcftools view -i 'SVTYPE=\"DEL\" | SVTYPE=\"INS\"' {input} | bcftools sort > {output}"
