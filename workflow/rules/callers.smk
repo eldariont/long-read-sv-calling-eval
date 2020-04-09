@@ -37,7 +37,7 @@ rule filter_svim:
         temp("pipeline/SVIM/{aligner}/{data}/{parameters}/min_{minscore,[0-9]+}.vcf")
     threads: 1
     shell:
-        "grep -v \"hom_ref\" {input} | \
+        "bcftools view -e \"GT=='0/0'\" {input} | \
          awk 'OFS=\"\\t\" {{ if($1 ~ /^#/) {{ print $0 }} \
          else {{ if($6>={wildcards.minscore}) {{ print $1, $2, $3, $4, $5, $6, \"PASS\", $8, $9, $10 }} }} }}' > {output}"
 
