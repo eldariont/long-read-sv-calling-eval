@@ -34,6 +34,7 @@ rule all:
         expand("pipeline/eval/{aligner}/results.{aligner}.all.png", aligner=ALIGNERS),
         expand("pipeline/eval/{aligner}/results.{aligner}.tools.{vcf}.png", aligner=ALIGNERS, vcf=VCFS),
         expand("pipeline/eval/{aligner}/results.{aligner}.coverages.{vcf}.png", aligner=ALIGNERS, vcf=VCFS),
-        #expand("pipeline/eval/{aligner}/results.{aligner}.coverages.bar.png", aligner=ALIGNERS)
+        expand("pipeline/eval/{aligner}/results.{aligner}.svim.parameters.png", aligner=ALIGNERS),
+        #expand("pipeline/eval/{aligner}/results.{aligner}.coverages.bar.png", aligner=ALIGNERS),
         expand("pipeline/alignment_stats/alignment_stats.{aligner}.txt", aligner=ALIGNERS),
         expand("pipeline/mosdepth/mean_coverages.{aligner}.txt", aligner=ALIGNERS)

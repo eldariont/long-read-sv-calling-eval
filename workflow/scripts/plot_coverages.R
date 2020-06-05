@@ -27,5 +27,5 @@ res %>%
       theme(panel.spacing = unit(0.75, "lines")) +
       theme(text = element_text(size=14), axis.text.x = element_text(size=9), axis.text.y = element_text(size=9))
 
-ggsave(args[3], width=5, height=4)
+ggsave(args[3], width=5, height=2)
 
