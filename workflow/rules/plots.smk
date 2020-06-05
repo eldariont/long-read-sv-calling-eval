@@ -1,4 +1,59 @@
-localrules: SV_length_plot, SV_length_plot_svim
+localrules: plot_pr_all_results, plot_pr_tools, plot_pr_coverages, plot_pr_svim_parameters, SV_length_plot, SV_length_plot_svim
+
+rule plot_pr_all_results:
+    input:
+        "pipeline/eval/{aligner}/all_results.txt"
+    output:
+        "pipeline/eval/{aligner}/results.{aligner}.all.png"
+    threads: 1
+    log:
+        "pipeline/logs/rplot.all.{aligner}.log"
+    shell:
+        "Rscript --vanilla workflow/scripts/plot_all_results.R {input} {output} > {log}"
+
+rule plot_pr_tools:
+    input:
+        "pipeline/eval/{aligner}/all_results.txt"
+    output:
+        "pipeline/eval/{aligner}/results.{aligner}.tools.{vcf}.png"
+    threads: 1
+    log:
+        "pipeline/logs/rplot.tools.{aligner}.{vcf}.log"
+    shell:
+        "Rscript --vanilla workflow/scripts/plot_tools.R {input} {wildcards.vcf} {output} > {log}"
+
+rule plot_pr_coverages:
+    input:
+        "pipeline/eval/{aligner}/all_results.txt"
+    output:
+        "pipeline/eval/{aligner}/results.{aligner}.coverages.{vcf}.png"
+    threads: 1
+    log:
+        "pipeline/logs/rplot.coverages.{aligner}.{vcf}.log"
+    shell:
+        "Rscript --vanilla workflow/scripts/plot_coverages.R {input} {wildcards.vcf} {output} > {log}"
+
+rule plot_pr_svim_parameters:
+    input:
+        "pipeline/eval/{aligner}/svim_parameter_results.txt"
+    output:
+        "pipeline/eval/{aligner}/results.{aligner}.svim.parameters.png"
+    threads: 1
+    log:
+        "pipeline/logs/rplot.all.{aligner}.log"
+    shell:
+        "Rscript --vanilla workflow/scripts/plot_svim_parameters.R {input} {output} > {log}"
+
+# rule plot_pr_coverages_bar:
+#     input:
+#         "pipeline/eval/{aligner}/all_results.txt"
+#     output:
+#         "pipeline/eval/{aligner}/results.{aligner}.coverages.bar.png"
+#     threads: 1
+#     log:
+#         "pipeline/logs/rplot.coveragesbar.{aligner}.log"
+#     shell:
+#         "Rscript --vanilla workflow/scripts/plot_coverages_bar.R {input} {output} > {log}"
 
 rule SV_length_plot:
     input:

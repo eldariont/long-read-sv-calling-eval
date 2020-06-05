@@ -12,12 +12,11 @@ VCFS=["giab", "giab.gt"]
 wildcard_constraints:
     aligner="minimap2|ngmlr|pbmm2"
 
-include: "workflow/rules/mosdepth.smk"
-include: "workflow/rules/plots.smk"
 include: "workflow/rules/align.smk"
-#include: "workflow/rules/survivor.smk"
+include: "workflow/rules/mosdepth.smk"
 include: "workflow/rules/callers.smk"
 include: "workflow/rules/eval.smk"
+include: "workflow/rules/plots.smk"
 
 ##### Target rules #####
 
