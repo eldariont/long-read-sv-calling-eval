@@ -26,12 +26,13 @@ rule plot_pr_coverages:
     input:
         "pipeline/eval/{aligner}/all_results.txt"
     output:
-        "pipeline/eval/{aligner}/results.{aligner}.coverages.{vcf}.png"
+        png = "pipeline/eval/{aligner}/results.{aligner}.coverages.{vcf}.png",
+        tsv = "pipeline/eval/{aligner}/results.{aligner}.coverages.{vcf}.tsv"
     threads: 1
     log:
         "pipeline/logs/rplot.coverages.{aligner}.{vcf}.log"
     shell:
-        "Rscript --vanilla workflow/scripts/plot_coverages.R {input} {wildcards.vcf} {output} > {log}"
+        "Rscript --vanilla workflow/scripts/plot_coverages.R {input} {wildcards.vcf} {output.png} {output.tsv} > {log}"
 
 rule plot_pr_svim_parameters:
     input:
