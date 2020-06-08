@@ -28,7 +28,10 @@ rule all:
         #"minimap2/mosdepth/mean_coverages.txt",
         #"minimap2/mosdepth_global_plot/global.html",
         #SV lengths
-        #"pipeline/SV-plots/minimap2/pooled/SV-length_Sniffles_11.png",
+        expand("pipeline/SV-plots/minimap2/pooled/SV-length_pbsv_{minscore}.png", minscore=[3, 5, 7]),
+        expand("pipeline/SV-plots/minimap2/pooled/SV-length_Sniffles_{minscore}.png", minscore=[3, 5, 7]),
+        expand("pipeline/SV-plots/minimap2/pooled/SV-length_SVIM_1000_900_0.3_{minscore}.png", minscore=[3, 5, 7]),
+        "pipeline/SV-plots/minimap2/pooled/SV-counts.merged.png",
         #Evaluation
         expand("pipeline/eval/{aligner}/results.{aligner}.all.png", aligner=ALIGNERS),
         expand("pipeline/eval/{aligner}/results.{aligner}.tools.{vcf}.png", aligner=ALIGNERS, vcf=VCFS),

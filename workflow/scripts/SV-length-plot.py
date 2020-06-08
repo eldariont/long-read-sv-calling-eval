@@ -12,22 +12,41 @@ def main():
     args = get_args()
     len_dict = defaultdict(list)
     for v in VCF(args.vcf):
-        if not v.INFO.get('SVTYPE') == 'TRA':
-            try:
-                if abs(v.INFO.get('SVLEN')) >= 50:
-                    len_dict[v.INFO.get('SVTYPE')].append(abs(v.INFO.get('SVLEN')))
-            except TypeError:
-                if v.INFO.get('SVTYPE') == 'INV':
-                    if (v.end - v.start) >= 50:
-                        len_dict[v.INFO.get('SVTYPE')].append(v.end - v.start)
-                        sys.stderr.write("SVLEN field missing. Inferred SV length from END and POS:\n{}\n\n".format(v))
-                else:
-                    sys.stderr.write("Exception when parsing variant:\n{}\n\n".format(v))
+        #ignore TRAs and BNDs
+        if v.INFO.get('SVTYPE') in ['TRA', 'BND']:
+            continue
+        #filter by score
+        if args.min_score != 0 and v.QUAL < args.min_score:
+            continue
+        #filter out HOM_REFs
+        if len(v.gt_types) > 0 and v.gt_types[0] == 0:
+            continue
+        try:
+            #filter by SV length
+            if abs(v.INFO.get('SVLEN')) >= 50:
+                len_dict[v.INFO.get('SVTYPE')].append(abs(v.INFO.get('SVLEN')))
+        except TypeError:
+            #filter by inversion length
+            if v.INFO.get('SVTYPE') == 'INV':
+                if (v.end - v.start) >= 50:
+                    len_dict[v.INFO.get('SVTYPE')].append(v.end - v.start)
+                    sys.stderr.write("SVLEN field missing. Inferred SV length from END and POS:\n{}\n\n".format(v))
+            else:
+                sys.stderr.write("Exception when parsing variant:\n{}\n\n".format(v))
     with open(args.counts, 'w') as counts:
-        counts.write("Number of nucleotides affected by SV:\n")
+        counts.write("#Size class\tType\tCount\tCumulative length\tTool\n")
         for svtype, lengths in len_dict.items():
-            counts.write("{}:\t{} variants\t{}bp\n".format(
-                svtype, len(lengths), sum(lengths)))
+            tiny = [l for l in lengths if l < 200]
+            small = [l for l in lengths if l >= 200 and l < 1000]
+            medium = [l for l in lengths if l >= 1000 and l < 10000]
+            large = [l for l in lengths if l >= 10000 and l < 100000]
+            huge = [l for l in lengths if l >= 100000]
+            counts.write("{}\t{}\t{}\t{}\t{}\n".format("all", svtype, len(lengths), sum(lengths), args.tool))
+            counts.write("{}\t{}\t{}\t{}\t{}\n".format("tiny", svtype, len(tiny), sum(tiny), args.tool))
+            counts.write("{}\t{}\t{}\t{}\t{}\n".format("small", svtype, len(small), sum(small), args.tool))
+            counts.write("{}\t{}\t{}\t{}\t{}\n".format("medium", svtype, len(medium), sum(medium), args.tool))
+            counts.write("{}\t{}\t{}\t{}\t{}\n".format("large", svtype, len(large), sum(large), args.tool))
+            counts.write("{}\t{}\t{}\t{}\t{}\n".format("huge", svtype, len(huge), sum(huge), args.tool))
     make_plot(dict_of_lengths=len_dict,
               output=args.output)
 
@@ -42,7 +61,15 @@ def make_plot(dict_of_lengths, output):
     Second bar chart is up to 20kb, with bins of 100bp
      and uses log scaling on the y-axis
     """
-    standard_order = ['DEL', 'INS', 'DUP', 'INV']
+    try:
+        dict_of_lengths["DUP:TANDEM"] = dict_of_lengths.pop("DUP")
+    except KeyError:
+        pass
+    try:
+        dict_of_lengths["DUP:INT"] = dict_of_lengths.pop("cnv")
+    except KeyError:
+        pass
+    standard_order = ['DEL', 'INS', 'INV', 'DUP:TANDEM', 'DUP:INT', 'BND']
     if len(dict_of_lengths.keys()) > 0:
         spec_order = sorted([i for i in dict_of_lengths.keys() if i not in standard_order])
         sorter = standard_order + spec_order
@@ -81,12 +108,19 @@ def make_plot(dict_of_lengths, output):
 def get_args():
     parser = ArgumentParser(description="create stacked bar plot of the SV lengths split by type")
     parser.add_argument("vcf", help="vcf file to parse")
+    parser.add_argument("-m", "--min_score", 
+                        type=int,
+                        default=0,
+                        help="filter out records with lower score (default: 0, do not filter)")
     parser.add_argument("-o", "--output",
                         help="output file to write figure to",
                         default="SV-length.png")
     parser.add_argument("-c", "--counts",
                         help="output file to write counts to",
                         default="SV-length.txt")
+    parser.add_argument("-t", "--tool",
+                        help="tool name",
+                        default="Unknown")
     return parser.parse_args()
 
 

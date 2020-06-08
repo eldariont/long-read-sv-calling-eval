@@ -7,7 +7,7 @@ rule run_svim:
         bam="pipeline/alignment_pooled/{data}.{aligner}.bam",
         bai="pipeline/alignment_pooled/{data}.{aligner}.bam.bai"
     output:
-        "pipeline/SVIM/{aligner}/{data}/{pmd}_{dn}_{cmd}/variants.vcf"
+        "pipeline/SVIM/{aligner}/{data}/{pmd,[0-9]+}_{dn,[0-9]+}_{cmd,[0-9\.]+}/variants.vcf"
     resources:
         mem_mb = 10000,
         time_min = 600,
