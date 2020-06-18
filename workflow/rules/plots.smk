@@ -114,7 +114,7 @@ rule SV_length_plot_pbsv:
     conda:
         "../envs/cyvcf2.yaml"
     shell:
-        "python workflow/scripts/SV-length-plot.py {input} --output {output.plot} --counts {output.counts} --tool pbsv 2> {log}"
+        "python workflow/scripts/SV-length-plot.py {input} --output {output.plot} --counts {output.counts} --filter 'hs37d5' --tool pbsv 2> {log}"
 
 rule SV_length_plot_sniffles:
     input:
@@ -127,7 +127,7 @@ rule SV_length_plot_sniffles:
     conda:
         "../envs/cyvcf2.yaml"
     shell:
-        "python workflow/scripts/SV-length-plot.py {input} --output {output.plot} --counts {output.counts} --tool Sniffles 2> {log}"
+        "python workflow/scripts/SV-length-plot.py {input} --output {output.plot} --counts {output.counts} --filter 'hs37d5'  --tool Sniffles 2> {log}"
 
 #run SVIM without converting DUP to INS
 rule run_svim_all_types:
@@ -168,7 +168,7 @@ rule SV_length_plot_svim:
     conda:
         "../envs/cyvcf2.yaml"
     shell:
-        "python workflow/scripts/SV-length-plot.py {input} --min_score {wildcards.minimum} --output {output.plot} --counts {output.counts} --tool SVIM 2> {log}"
+        "python workflow/scripts/SV-length-plot.py {input} --min_score {wildcards.minimum} --output {output.plot} --counts {output.counts} --filter 'hs37d5'  --tool SVIM 2> {log}"
 
 rule merge_counts:
     input:
