@@ -24,10 +24,11 @@ final%>%
       geom_point(size=1.0, alpha=0.7) +
       scale_shape_manual(values=c(15,16,17)) +
       scale_color_manual(values=c("deepskyblue3", "goldenrod2", "firebrick2")) +
+      scale_x_continuous(breaks=seq(0,100,20), minor_breaks=seq(10,90,20), limits=c(0,100)) +
+      scale_y_continuous(breaks=seq(0,100,20), minor_breaks=seq(10,90,20), limits=c(0,100)) +
       labs(y = "Highest F1-score", x = "Dataset subsample", color = "Tool", pch = "Tool") +
-      lims(x=c(0,100), y=c(0,100)) +
       theme_bw() +
       theme(panel.spacing = unit(0.75, "lines")) +
-      theme(text = element_text(size=14), axis.text.x = element_text(size=9), axis.text.y = element_text(size=9))
-ggsave(args[3], width=5, height=4)
+      theme(text = element_text(size=20))
+ggsave(args[3], width=5.5, height=4)
 final %>% write_tsv(args[4])

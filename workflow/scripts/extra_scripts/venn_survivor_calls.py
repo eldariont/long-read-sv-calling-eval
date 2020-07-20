@@ -7,8 +7,8 @@ import sys
 
 def get_args():
     parser = ArgumentParser(description="Comparison of vcf sets merged by SURVIVOR")
-    parser.add_argument("--vcf", help="vcf file merged by SURVIVOR containing two or three sets")
-    parser.add_argument("--names", help="names of sets", nargs='*')
+    parser.add_argument("--vcf", required = True, help="vcf file merged by SURVIVOR containing two or three sets")
+    parser.add_argument("--names", required = True, help="names of sets", nargs='*')
     return parser.parse_args()
 
 
