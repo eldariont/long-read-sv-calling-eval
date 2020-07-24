@@ -172,7 +172,7 @@ rule SV_length_plot_svim:
 
 rule merge_counts:
     input:
-        svim = "pipeline/SV-plots/{aligner}/{data}/SV-counts_SVIM_1000_900_0.3_7.txt",
+        svim = "pipeline/SV-plots/{aligner}/{data}/SV-counts_SVIM_1000_900_0.3_5.txt",
         sniffles = "pipeline/SV-plots/{aligner}/{data}/SV-counts_Sniffles_5.txt",
         pbsv = "pipeline/SV-plots/{aligner}/{data}/SV-counts_pbsv_5.txt",
     output:

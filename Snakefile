@@ -17,6 +17,7 @@ include: "workflow/rules/mosdepth.smk"
 include: "workflow/rules/callers.smk"
 include: "workflow/rules/eval.smk"
 include: "workflow/rules/plots.smk"
+include: "workflow/rules/runtime.smk"
 
 ##### Target rules #####
 
@@ -36,7 +37,10 @@ rule all:
         expand("pipeline/eval/{aligner}/results.{aligner}.all.png", aligner=ALIGNERS),
         expand("pipeline/eval/{aligner}/results.{aligner}.tools.{vcf}.png", aligner=ALIGNERS, vcf=VCFS),
         expand("pipeline/eval/{aligner}/results.{aligner}.coverages.{vcf}.png", aligner=ALIGNERS, vcf=VCFS),
-        expand("pipeline/eval/{aligner}/results.{aligner}.svim.parameters.png", aligner=ALIGNERS),
+        #expand("pipeline/eval/{aligner}/results.{aligner}.svim.parameters.png", aligner=ALIGNERS),
         #expand("pipeline/eval/{aligner}/results.{aligner}.coverages.bar.png", aligner=ALIGNERS),
         expand("pipeline/alignment_stats/alignment_stats.{aligner}.txt", aligner=ALIGNERS),
-        expand("pipeline/mosdepth/mean_coverages.{aligner}.txt", aligner=ALIGNERS)
+        expand("pipeline/mosdepth/mean_coverages.{aligner}.txt", aligner=ALIGNERS),
+        expand("pipeline/runtimes/SVIM/minimap2/pooled/1000_900_0.3_run{run}/SVIM.times", run=[1,2,3]),
+        expand("pipeline/runtimes/pbsv/minimap2/pooled_run{run}/pbsv.times", run=[1,2,3]),
+        expand("pipeline/runtimes/Sniffles/minimap2/pooled_run{run}/Sniffles.times", run=[1,2,3])
