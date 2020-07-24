@@ -17,7 +17,7 @@ rule run_svim:
         min_sv_size = config["parameters"]["min_sv_size"]
     threads: 1
     shell:
-        "/home/heller_d/bin/anaconda3/bin/svim alignment --sample {wildcards.data} \
+        "/home/heller_d/bin/anaconda3/envs/svim_new/bin/python /home/heller_d/bin/anaconda3/envs/svim_new/bin/svim alignment --sample {wildcards.data} \
          --partition_max_distance {wildcards.pmd} \
          --distance_normalizer {wildcards.dn} \
          --cluster_max_distance {wildcards.cmd} \
@@ -27,6 +27,7 @@ rule run_svim:
          --interspersed_duplications_as_insertions \
          --tandem_duplications_as_insertions \
          --read_names \
+         --max_sv_size 1000000 \
          --verbose \
          {params.working_dir} {input.bam} {input.genome}"
 
