@@ -125,21 +125,21 @@ rule cat_truvari_results:
                           data = SUBSAMPLES, 
                           minscore=list(range(config["minimums"]["sniffles_from"], config["minimums"]["sniffles_to"]+1, config["minimums"]["sniffles_step"])),
                           vcf=VCFS),
-        pbsv = expand("pipeline/pbsv_results/{{aligner}}/{data}/{minscore}/{vcf}/pr_rec.txt", 
-                          data = SUBSAMPLES, 
-                          minscore=list(range(config["minimums"]["pbsv_from"], config["minimums"]["pbsv_to"]+1, config["minimums"]["pbsv_step"])), 
-                          vcf=VCFS)
+        # pbsv = expand("pipeline/pbsv_results/{{aligner}}/{data}/{minscore}/{vcf}/pr_rec.txt", 
+        #                   data = SUBSAMPLES, 
+        #                   minscore=list(range(config["minimums"]["pbsv_from"], config["minimums"]["pbsv_to"]+1, config["minimums"]["pbsv_step"])), 
+        #                   vcf=VCFS)
     output:
         svim = temp("pipeline/eval/{aligner}/svim.results.txt"),
         sniffles = temp("pipeline/eval/{aligner}/sniffles.results.txt"),
-        pbsv = temp("pipeline/eval/{aligner}/pbsv.results.txt"),
+        #pbsv = temp("pipeline/eval/{aligner}/pbsv.results.txt"),
         all = "pipeline/eval/{aligner}/all_results.txt"
     threads: 1
     run:
         shell("cat {input.svim} > {output.svim}")
         shell("cat {input.sniffles} > {output.sniffles}")
-        shell("cat {input.pbsv} > {output.pbsv}")
-        shell("cat {output.svim} {output.sniffles} {output.pbsv} > {output.all}")
+        #shell("cat {input.pbsv} > {output.pbsv}")
+        shell("cat {output.svim} {output.sniffles} > {output.all}")
 
 rule cat_truvari_results_svim_parameters:
     input:

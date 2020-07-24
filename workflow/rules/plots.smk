@@ -1,4 +1,4 @@
-localrules: plot_pr_all_results, plot_pr_tools, plot_pr_coverages, plot_pr_svim_parameters, run_pbsv1_all_types, run_pbsv2_all_types, SV_length_plot_pbsv, SV_length_plot_svim, run_svim_all_types, SV_length_plot_svim
+localrules: plot_pr_all_results, plot_pr_tools, plot_pr_coverages, plot_pr_svim_parameters, SV_length_plot_svim, run_svim_all_types, SV_length_plot_svim
 
 rule plot_pr_all_results:
     input:
@@ -55,66 +55,6 @@ rule plot_pr_svim_parameters:
 #         "pipeline/logs/rplot.coveragesbar.{aligner}.log"
 #     shell:
 #         "Rscript --vanilla workflow/scripts/plot_coverages_bar.R {input} {output} > {log}"
-
-#run pbsv for all SV types
-rule run_pbsv1_all_types:
-    input:
-        bam = "pipeline/alignment_pooled/{data}.pbmm2.bam",
-        bai = "pipeline/alignment_pooled/{data}.pbmm2.bam.bai",
-        genome = config["reference"],
-    output:
-        svsig = temp("pipeline/pbsv/{aligner}/{data}/svsig_all_types.svsig.gz")
-    resources:
-        mem_mb = 10000,
-        time_min = 600,
-        io_gb = 100
-    threads: 1
-    conda:
-        "../envs/pbsv.yaml"
-    shell:
-        """
-        pbsv discover {input.bam} {output.svsig}
-        """
-
-rule run_pbsv2_all_types:
-    input:
-        svsig = "pipeline/pbsv/{aligner}/{data}/svsig_all_types.svsig.gz",
-        genome = config["reference"],
-    output:
-        vcf = "pipeline/pbsv/{aligner}/{data}/min_{minsupport,[0-9]+}_all_types.vcf"
-    params:
-        min_sv_size = config["parameters"]["min_sv_size"]
-    resources:
-        mem_mb = 10000,
-        time_min = 600,
-        io_gb = 100
-    threads: 1
-    conda:
-        "../envs/pbsv.yaml"
-    shell:
-        """
-        pbsv call -j 1 \
-        --min-sv-length {params.min_sv_size} \
-        --max-ins-length 100K \
-        --call-min-reads-one-sample {wildcards.minsupport} \
-        --call-min-reads-all-samples {wildcards.minsupport} \
-        --call-min-reads-per-strand-all-samples 0 \
-        --call-min-bnd-reads-all-samples 0 \
-        --call-min-read-perc-one-sample 0 {input.genome} {input.svsig} {output.vcf}
-        """
-
-rule SV_length_plot_pbsv:
-    input:
-        "pipeline/pbsv/{aligner}/{data}/min_{minimum}_all_types.vcf"
-    output:
-        plot = "pipeline/SV-plots/{aligner}/{data}/SV-length_pbsv_{minimum}.png",
-        counts = "pipeline/SV-plots/{aligner}/{data}/SV-counts_pbsv_{minimum}.txt",
-    log:
-        "logs/svplot/svlength_pbsv_{aligner}_{data}_{minimum}.log"
-    conda:
-        "../envs/cyvcf2.yaml"
-    shell:
-        "python workflow/scripts/SV-length-plot.py {input} --output {output.plot} --counts {output.counts} --filter 'hs37d5' --tool pbsv 2> {log}"
 
 rule SV_length_plot_sniffles:
     input:
@@ -173,8 +113,7 @@ rule SV_length_plot_svim:
 rule merge_counts:
     input:
         svim = "pipeline/SV-plots/{aligner}/{data}/SV-counts_SVIM_1000_900_0.3_7.txt",
-        sniffles = "pipeline/SV-plots/{aligner}/{data}/SV-counts_Sniffles_5.txt",
-        pbsv = "pipeline/SV-plots/{aligner}/{data}/SV-counts_pbsv_5.txt",
+        sniffles = "pipeline/SV-plots/{aligner}/{data}/SV-counts_Sniffles_5.txt"
     output:
         "pipeline/SV-plots/{aligner}/{data}/SV-counts.merged.txt"
     shell:

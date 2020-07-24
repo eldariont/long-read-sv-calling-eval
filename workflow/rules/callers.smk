@@ -10,7 +10,7 @@ rule run_svim:
         "pipeline/SVIM/{aligner}/{data}/{pmd,[0-9]+}_{dn,[0-9]+}_{cmd,[0-9\.]+}/variants.vcf"
     resources:
         mem_mb = 10000,
-        time_min = 600,
+        time_min = 1200,
         io_gb = 100
     params:
         working_dir = "pipeline/SVIM/{aligner}/{data}/{pmd}_{dn}_{cmd}/",

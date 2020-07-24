@@ -4,7 +4,7 @@ library(scales)
 args = commandArgs(trailingOnly=TRUE)
 
 res <- read_tsv(args[1], col_names = c("caller", "mapper", "subsample", "vcf", "score", "metric", "value"))
-res$caller = factor(res$caller, levels=c('pbsv', 'Sniffles', 'SVIM'), labels=c('pbsv', 'Sniffles', 'SVIM'))
+res$caller = factor(res$caller, levels=c('Sniffles', 'SVIM'), labels=c('Sniffles', 'SVIM'))
 
 
 res %>%
@@ -15,8 +15,8 @@ res %>%
     filter(subsample=="pooled", vcf==args[2]) %>%
     ggplot(aes(recall, precision, color=caller, pch=caller)) +
       geom_point(size=1.0) +
-      scale_shape_manual(values=c(15,16,17)) +
-      scale_color_manual(values=c("deepskyblue3", "goldenrod2", "firebrick2")) +
+      scale_shape_manual(values=c(16,17)) +
+      scale_color_manual(values=c("goldenrod2", "firebrick2")) +
       scale_x_continuous(breaks=seq(0,100,20), minor_breaks=seq(10,90,20), limits=c(0,100)) +
       scale_y_continuous(breaks=seq(0,100,20), minor_breaks=seq(10,90,20), limits=c(0,100)) +
       geom_path() +
