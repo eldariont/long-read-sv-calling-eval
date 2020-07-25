@@ -1,4 +1,4 @@
-localrules: plot_pr_all_results, plot_pr_tools, plot_pr_coverages, plot_pr_svim_parameters, run_pbsv1_all_types, run_pbsv2_all_types, SV_length_plot_pbsv, SV_length_plot_svim, SV_length_plot_svim
+localrules: plot_pr_all_results, plot_pr_tools, plot_pr_coverages, plot_pr_svim_parameters, run_pbsv1_all_types, run_pbsv2_all_types, SV_length_plot_pbsv, SV_length_plot_sniffles, SV_length_plot_svim, merge_counts, plot_counts
 
 rule plot_pr_all_results:
     input:
